@@ -49,6 +49,7 @@ class MainMenu:
         Updates the scene, in this case updating the buttons.
         """
         self.sprite_group.update()
+        pygame.event.get() #keep game running
     
     def render(self):
         """

@@ -72,6 +72,7 @@ class Credits():
         """
         Updates the scene.
         """
+        pygame.event.get() #keep game running
         #only update the backbutton if it should be visible (i.e. user isn't on first page)
         if self.page_index != 0:
             self.back_button.update()

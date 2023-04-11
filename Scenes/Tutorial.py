@@ -3,6 +3,7 @@ import pygame
 from Classes.ImageButton import ImageButton
 from Classes.TextRenderer import TextRenderer
 from Classes.ImageHelper import ImageHelper
+from puzzles import puzzle1
 
 #set up some constants
 DONE_BUTTON_POSITION = (785, 865)
@@ -63,7 +64,7 @@ class Tutorial():
         done_button = ImageButton(
             self.images.done_button,
             DONE_BUTTON_POSITION,
-            lambda: change_fn(Game(screen, change_fn)),
+            lambda: change_fn(Game(screen, puzzle1, change_fn)),
             1.05
         )
         self.sprite_group.add(done_button, main_text)
@@ -72,6 +73,7 @@ class Tutorial():
         """
         Updates the scene.
         """
+        pygame.event.get() #keep game running
         #only update the backbutton if it should be visible (i.e. user isn't on first page)
         if self.page_index != 0:
             self.back_button.update()

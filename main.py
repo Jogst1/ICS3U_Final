@@ -36,7 +36,6 @@ current_scene = [MainMenu(screen, change_scene)]
 
 #main gameloop
 while game_running:
-    pygame.event.get() #TODO: remove this/find an alternative, was only for making sure the window didn't display "not responding"
     #update the current scene (handle user input, changes, etc)
     current_scene[0].update()
     #render the current scene
