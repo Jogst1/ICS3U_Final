@@ -10,7 +10,7 @@ GRID_SIZE_PIXELS = (1500, 700)
 GRID_POSITION = (20, 20)
 MICROCONTROLLER_OFFSET = 10
 
-class Grid():
+class Grid(pygame.sprite.Sprite):
     """
     Represents the grid where wires and microcontrollers will be placed.
     """
@@ -46,6 +46,13 @@ class Grid():
                     self.add_wire(mouse_grid)
                 else:
                     self.remove_wire(mouse_grid)
+
+        update_sprites = [item for item in self.grid.values() if issubclass(type(item), pygame.sprite.Sprite)]
+        for sprite in update_sprites: 
+            if isinstance(sprite, Microcontroller):
+                sprite.update(events)
+            else:
+                sprite.update()
 
     def render(self):
         render_sprites = [item for item in self.grid.values() if issubclass(type(item), pygame.sprite.Sprite)]
