@@ -3,6 +3,7 @@ from Classes.Puzzles.Puzzle import Puzzle
 from Classes.ImageHelper import ImageHelper
 from Classes.TextRenderer import TextRenderer
 from Classes.Game.Grid import Grid
+from Classes.ImageButton import ImageButton
 
 #set up some constants
 INSTRUCTIONS_POSITION = (1549, 145)
@@ -34,10 +35,19 @@ class Game():
             pygame.Rect(INSTRUCTIONS_POSITION, INSTRUCTIONS_SIZE)
         )
         self.sprite_group.add(instruction_text)
-        self.grid = Grid()
+        self.grid = Grid(puzzle.example_testcase.inputs, puzzle.example_testcase.inputs2)
+
+        def step_button_onclick():
+            self.grid.do_sim_tick()
+        self.step_button = ImageButton(self.images.step_button, (1561, 856), step_button_onclick, 1.05)
+        self.sprite_group.add(self.step_button)
+
         
     def update(self):
         self.grid.update()
+        self.step_button.update()
+
+
     def render(self):
         self.screen.blit(self.images.background, (0, 0))
         self.grid.render()

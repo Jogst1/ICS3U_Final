@@ -1,4 +1,5 @@
 import pygame
+import math
 
 class ImageButton(pygame.sprite.Sprite):
     """
@@ -31,8 +32,9 @@ class ImageButton(pygame.sprite.Sprite):
         self.onclick = onclick
         self.expandOnHover = expandOnHover
         #calculate the difference in size when scaled, for both x and y
-        self.expandXDiff = self.rect.size[0] * expandOnHover - self.rect.size[0]
-        self.expandYDiff = self.rect.size[1] * expandOnHover - self.rect.size[1]
+        if self.expandOnHover != None:
+            self.expandXDiff = math.ceil(self.rect.size[0] * expandOnHover - self.rect.size[0])
+            self.expandYDiff = math.ceil(self.rect.size[1] * expandOnHover - self.rect.size[1])
         #variables for keeping track of states/debouncing
         self.debounce = False
         self.expanded = False
