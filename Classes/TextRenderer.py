@@ -52,7 +52,13 @@ class TextRenderer(pygame.sprite.Sprite):
             #get the next word
             word = words.pop()
             #if the word added to the current line is still within the bounds of the rect
-            if len(current_line+word)*font_width < self.rect.width:
+            if "\n" in word:
+                subwords = word.split("\n")
+                current_line = current_line + subwords[0]
+                lines.append(current_line)
+                current_line = subwords[1] + " "
+
+            elif len(current_line+word)*font_width < self.rect.width:
                 #add the word to the current line, followed by a space
                 current_line = current_line+word + " "
             else:

@@ -10,6 +10,8 @@ DONE_BUTTON_POSITION = (785, 865)
 BACK_BUTTON_POSITION = (410, 865)
 NEXT_BUTTON_POSITION = (1150, 865)
 
+FONT = pygame.font.Font("Assets/Fonts/IBMPlexMono-Medium.ttf", 36)
+
 class Tutorial():
     """
     The tutorial scene
@@ -31,7 +33,7 @@ class Tutorial():
         self.screen = screen
         self.images = ImageHelper(screen)
         with open("Assets/Tutorial/tutorial.txt", "r") as data:
-            self.pages = data.read().replace("\n", "").split("<NEWPAGE>")
+            self.pages = data.read().split("<NEWPAGE>\n")
         self.page_index = 0 #keeps track of the current page the user is on
         self.sprite_group = pygame.sprite.Group()
 
@@ -40,7 +42,7 @@ class Tutorial():
         main_text = TextRenderer(
             self.pages[self.page_index],
             (0, 0, 0),
-            pygame.font.Font("Assets/Fonts/IBMPlexMono-Medium.ttf", 36),
+            FONT,
             pygame.Rect((518, 278), (884, 525))
         )
         def onclick_back_button():

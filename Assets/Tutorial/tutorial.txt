@@ -1,5 +1,36 @@
-tutorial text!
+Welcome to Merivale I/O! In this game, you play as a circuit designer.
+In each level, you will be given a task to complete, and will have to solve the given task using Microcontrollers and Wires. You can place a microcontroller on the work grid by pressing the E key, and remove one by pressing the Q key. 
+In order to place wires, you can click on a grid space, and to remove a wire, right click on the same grid space.
 <NEWPAGE>
-tutorial text 2!!
+Given a task, you will have to connect wires and microcontrollers to the IO Ports on either side of the grid. 
+You will then have to program the microcontrollers with the Microcoded Hardware System (M.H.S.) language, detailed later in the tutorial.
+Once you are finished designing your solution, you may test it with the Step, Advance, and Reset buttons, which will play through a simulation. 
 <NEWPAGE>
-tutorial text 3!!!
+Once you are happy with how your solution works, you can check it for correctness with the Check Tests button. 
+(IN-DEV NOTE): Right now, checking tests is incomplete, and instead of a GUI screen, will just log either a success or failure to the console. (END IN-DEV NOTE) 
+The M.H.S language details can be found on the next page.
+<NEWPAGE>
+M.H.S. Instructions:
+mov: Move a value (number or register) into a register. Ex: `mov in1 mhs`
+jmp: Jump to a new line, provided by a value (number or register). Values larger than 9 will be capped to 9. Ex: `jmp 4`, or `jmp ics`
+slp: Sleep for ticks provided by a value (number or register). Programs should always have 1 `slp` statement, to avoid undefined behavior. Ex: `slp 1`.
+<NEWPAGE>
+M.H.S. Instructions (Arithmetic):
+add: Add a value (number or register) to the `mhs` register. Ex: `add 1`
+sub: Subtract a value (number or register) from the `mhs` register. Ex: `sub in1`
+mul: Multiply the `mhs` register by a value (number or register). Ex: `mul 4`
+All arithmetic operations will over/underflow the mhs register when going below 0 or above 999.
+<NEWPAGE>
+M.H.S. Instructions (Conditionals):
+All M.H.S. lines can be prepended with either a `+` or a `-`. These will cause the line to conditionally execute. The following instructions change the conditional state of a microcontroller:
+tis: Test if two values are equal
+tgt: Test if the first value is greater than the other
+tlt: Test if the first value is lesser than the other
+<NEWPAGE>
+Example Program:
+add 1
+mov mhs ics
+tis ics 1
++ mov ics ou1
+- mov 2 ou1
+slp 1
