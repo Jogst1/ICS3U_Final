@@ -2,7 +2,9 @@ import pygame
 import math
 
 #set up some generael use constants
-MICROCONTROLLER_IMAGE = pygame.image.load("Assets/Game/microcontroller.png").convert_alpha(pygame.display.get_surface())
+surf=pygame.display.get_surface()
+MICROCONTROLLER_IMAGE = pygame.image.load("Assets/Game/microcontroller.png").convert_alpha(surf)
+MICROCONNECTOR_IMAGE = pygame.image.load("Assets/Game/Wires/micro_connector.png").convert_alpha(surf)
 FONT_12PT = pygame.font.Font("Assets/Fonts/IBMPlexMono-Medium.ttf", 12)
 FONT_16PT = pygame.font.Font("Assets/Fonts/IBMPlexMono-Medium.ttf", 16)
 TEXT_OFFSET = (270 - 230, 10)
@@ -317,10 +319,30 @@ class Microcontroller(pygame.sprite.Sprite):
 
         
 
-class MicroPointer():
+class MicroPointer(pygame.sprite.Sprite):
     """
     A class to occupy grid spaces, that points to a microcontroller, and stores information about its respective port id
+    Also handles rendering of wires connecting other wires to the microcontroller
     """
     def __init__(self, pointTo: tuple[int, int], portId: str):
+        super().__init__()
         self.pointTo = pointTo
         self.portId = portId
+
+        self.surf = MICROCONNECTOR_IMAGE.copy()
+        self.rect = self.surf.get_rect()
+
+        self.connected = False
+
+        if self.portId != None and "2" in self.portId:
+            self.surf = pygame.transform.rotate(self.surf, 180)
+
+        self.surf.set_alpha(0)
+
+    def set_connected(self, flag: bool):
+        self.connected = flag
+        self.surf.set_alpha(256 * int(flag))
+
+    def to_modifier(self) -> tuple[int, int]:
+        if self.portId == None: return (0, 0)
+        return (-1, 0) if "1" in self.portId else (1, 0)

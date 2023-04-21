@@ -4,7 +4,7 @@ import typing
 from math import floor
 from collections import deque
 from Classes.Game.Microcontroller import Microcontroller, MicroPointer
-from Classes.Game.Wire import Wire, WireNeighbors as Neighbors
+from Classes.Game.Wire import Wire, Neighbors
 from Classes.Game.IOPort import IOPort
 
 #set up some constants for use later
@@ -39,17 +39,17 @@ class Grid(pygame.sprite.Sprite):
 
 
         #set up all the IOPorts
-        self.grid[(0, 2)] = IOPort("Input 1", input1values)
-        self.grid[(0, 2)].rect.topleft = (40, 240)
+        self.grid[(0, 2)] = IOPort("Input 1", (20, 220), input1values)
 
-        self.grid[(0, 4)] = IOPort("Input 2", input2values)
-        self.grid[(0, 4)].rect.topleft = (40, 440)
+        self.grid[(0, 4)] = IOPort("Input 2", (20, 420), input2values)
 
-        self.grid[(14, 2)] = IOPort("Output 1")
-        self.grid[(14, 2)].rect.topleft = (1440, 240)
+        self.grid[(14, 2)] = IOPort("Output 1", (1420, 220))
 
-        self.grid[(14, 4)] = IOPort("Output 2")
-        self.grid[(14, 4)].rect.topleft = (1440, 440)
+        self.grid[(14, 4)] = IOPort("Output 2", (1420, 420))
+
+        #set up some variables to allow creating wires
+        self.mouse_dragging = False
+        self.last_mouse_pos = None
     
     def update(self):
         """
@@ -61,6 +61,7 @@ class Grid(pygame.sprite.Sprite):
         
         #check the mouse is in the bounds of the grid
         mouse_position = pygame.mouse.get_pos()
+        mb1_pressed, _, mb2pressed = pygame.mouse.get_pressed()
         if (
             mouse_position[0] < GRID_POSITION[0] or
             mouse_position[0] > GRID_POSITION[0] + GRID_SIZE_PIXELS[0] or
@@ -88,16 +89,21 @@ class Grid(pygame.sprite.Sprite):
                 elif event.key == REMOVE_MICROCONTROLLER_KEY:
                     #removve the microcontroller underneath the mouse
                     self.remove_microcontroller(mouse_grid)
-            #if event is a mouse click
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                #if mouseclick is to add wire (mb1)
-                if event.button == 1:
-                    #add wire at mouse pos
-                    self.add_wire(mouse_grid)
-                #if it is to remove wire (right click)
-                else:
-                    #remove wire at mouse pos
-                    self.remove_wire(mouse_grid)
+
+        if self.mouse_dragging:
+            if mb1_pressed:
+                self.add_wire(self.last_mouse_pos, mouse_grid)
+                self.last_mouse_pos = mouse_grid
+            else:
+                self.mouse_dragging = False
+                self.last_mouse_pos = None
+        else:
+            if mb1_pressed:
+                self.mouse_dragging = True
+                self.last_mouse_pos = mouse_grid
+
+        if mb2pressed:
+            self.remove_wire(mouse_grid)
 
         #use a list comp to get all sprites in the grid
         update_sprites = [item for item in self.grid.values() if issubclass(type(item), pygame.sprite.Sprite)]
@@ -164,7 +170,7 @@ class Grid(pygame.sprite.Sprite):
             center_position[1] == GRID_SIZE[1]-1
         ): return
 
-        #make sure micro wont overlap IOPorts or another micro
+        #make sure micro wont overlap wires, IOPorts or another micro
         for item in [self.get(*center_position, mod) for mod in [
             (0, 0),
             (-1, 0),
@@ -173,7 +179,7 @@ class Grid(pygame.sprite.Sprite):
             (1, 1),
             (0, 1)
         ]]:
-            if isinstance(item, (IOPort, Microcontroller, MicroPointer)): return
+            if isinstance(item, (Wire, IOPort, Microcontroller, MicroPointer)): return
 
         #instantiate the microcontroller, calculating the pixel coordinate x,y position it should be at
         self.grid[center_position] = Microcontroller((
@@ -189,7 +195,13 @@ class Grid(pygame.sprite.Sprite):
             (0, +1, None),
             (+1, +1, "ou2")
         ]:
-            self.grid[(center_position[0] + modifier[0], center_position[1] + modifier[1])] = MicroPointer(center_position, modifier[2])
+            x = center_position[0] + modifier[0]
+            y = center_position[1] + modifier[1]
+            self.grid[(x, y)] = MicroPointer(center_position, modifier[2])
+            self.grid[(x, y)].rect.topleft = (
+                x * 100 + GRID_POSITION[0],
+                y * 100 + GRID_POSITION[1]
+            )
             
             
     def remove_microcontroller(self, position: tuple[int, int]):
@@ -207,78 +219,149 @@ class Grid(pygame.sprite.Sprite):
             return
 
         #remove associated micropointer instances
-        for modifier in [
-            (0, 0),
-            (-1, 0),
-            (-1, 1),
-            (1, 0),
-            (1, 1),
-            (0, 1)
+        for modifier, isPort in [
+            ((0, 0), False),
+            ((-1, 0), True),
+            ((-1, 1), True),
+            ((1, 0), True),
+            ((1, 1), True),
+            ((0, 1), False)
         ]:
-            self.grid[(microcontroller_pos[0] + modifier[0], microcontroller_pos[1] + modifier[1])] = None
+            pos = (microcontroller_pos[0] + modifier[0], microcontroller_pos[1] + modifier[1])
+            self.grid[pos] = None
+            if isPort:
+                for modifier, direction in zip(
+                    [  
+                        (0, -1),
+                        (0, 1),
+                        (-1, 0),
+                        (1, 0)
+                    ],
+                    [
+                        "down",
+                        "up",
+                        "right",
+                        "left"
+                    ]
+                ):
+                    gotten = self.get(*pos, modifier)
+                    if isinstance(gotten, Wire):
+                        wire_connections = gotten.connections
+                        wire_connections.__dict__[direction] = False
+                        gotten.update_connections(wire_connections)
 
-    
 
-    def add_wire(self, position: tuple[int, int]):
+    def add_wire(self, position1: tuple[int, int], position2: tuple[int, int]):
         """
-        Adds a wire in the requested position.
+        Creates a wire connecting two provided grid spaces
         """
+        MODIFIER_TO_STRING = {
+            (0, -1): "down",
+            (0, 1): "up",
+            (-1, 0): 'right',
+            (1, 0): "left"
+        }
 
-        #ensure the grid position is empty, if it isn't cancel the addition
-        if self.grid[position] != None: return
+        instance1 = self.get(*position1)
+        instance2 = self.get(*position2)
 
+        #make sure it isn't asking to write on top of a micro
+        if isinstance(instance1, Microcontroller) or isinstance(instance2, Microcontroller): return
 
-        #get all the wire's neighbors.
-        neighbors = [self.get(*position, m) for m in [
-            (0, -1),
-            (0, 1),
-            (-1, 0),
-            (1, 0)
-        ]]
+        #make sure it isn't asking to add a wire spanning more than 2 grid cells
+        if abs(position1[0] - position2[0]) > 1 or abs(position1[1] - position2[1]) > 1: return
 
-        #array to keep track of if a wire has neighbors in a specific direction or not
-        boolNeighbors = []
+        #make sure it isn't asking to add a diagonal wire
+        if abs(position1[0] - position2[0]) > 0 and abs(position1[1] - position2[1]) > 0: return
 
-        #loop over the neighbors, zipped with some directioanl strings
-        for neighbor, direction in zip(neighbors, [
-            "down",
-            "up",
-            "right",
-            "left"
-        ]):
-            #if the neighbor is a wire
-            if isinstance(neighbor, Wire):
-                #add a true to the wire's neighbor list
-                boolNeighbors.append(True)
-                #update the neighbor wire's neighbors, since it's getting a new one with the placed wire
-                neighbor_current_neighbors = neighbor.current_neighbors
-                neighbor_current_neighbors.__dict__[direction] = True
-                neighbor.update_neighbors(neighbor_current_neighbors)
-            #if the neighbor is a micropointer
-            elif isinstance(neighbor, MicroPointer):
-                #if the neighbor is a horizontal one
-                if direction == "left" or direction == "right":
-                    #add it as a neighbor to the new wire's list
-                    boolNeighbors.append(True)
-                else:
-                    #don't
-                    boolNeighbors.append(False)
-            #if neighbor is an IOPort
-            elif isinstance(neighbor, IOPort):
-                #add it as a neighbor to the wire's list
-                boolNeighbors.append(True)
-            #otherwise
+        if isinstance(instance1, (Wire, type(None))) and isinstance(instance2, (Wire, type(None))):
+            if position1==position2:
+                if instance1 == None:
+                    self.grid[position1] = Wire(
+                        Neighbors(*([False]*4)),
+                        (
+                            (position1[0] * 100) + GRID_POSITION[0],
+                            (position1[1] * 100) + GRID_POSITION[1]
+                        )
+                    )
             else:
-                #add it as a non-neighbor to the wire's list
-                boolNeighbors.append(False)
+                for main, maininstance, neighbor in [(position1, instance1, position2), (position2, instance2, position1)]:
+                    if isinstance(maininstance, Wire):
+                        wire = maininstance
+                        wire_connections = wire.connections
+                        wire_connections.__dict__[
+                            MODIFIER_TO_STRING[
+                                (
+                                    main[0] - neighbor[0],
+                                    main[1] - neighbor[1]
+                                )
+                            ]
+                        ] = True
+                        wire.update_connections(wire_connections)
+                    else:
+                        wire_connections = Neighbors(False, False, False, False)
+                        wire_connections.__dict__[
+                            MODIFIER_TO_STRING[
+                                (
+                                    main[0] - neighbor[0],
+                                    main[1] - neighbor[1]
+                                )
+                            ]
+                        ] = True
+                        self.grid[main] = Wire(
+                            wire_connections,
+                            (
+                                (main[0] * 100) + GRID_POSITION[0],
+                                (main[1] * 100) + GRID_POSITION[1]
+                            )
+                        )
+        elif (
+            (isinstance(instance1, (Wire, type(None))) and (isinstance(instance2, (IOPort, MicroPointer)))) or
+            (isinstance(instance2, (Wire, type(None))) and (isinstance(instance1, (IOPort, MicroPointer))))
+        ):
+            
+            (
+                wire_position, 
+                other_position,
+                wire_instance,
+                other_instance
+            ) = (
+                (position1, position2, instance1, instance2)
+                if isinstance(instance1, (Wire, type(None))) 
+                else (position2, position1, instance2, instance1)
+            )
 
-        #instantiate a new wire, calculating the correct position, and providing it with the neighbors field.
-        wire = Wire(Neighbors(*boolNeighbors), (
-            (position[0] * 100) + GRID_POSITION[0],
-            (position[1] * 100) + GRID_POSITION[1]
-        ))
-        #add the wire instance to the grid
-        self.grid[position] = wire
+            wire = wire_instance if isinstance(wire_instance, Wire) else Wire(Neighbors(*([False] * 4)), (
+                (wire_position[0] * 100) + GRID_POSITION[0],
+                (wire_position[1] * 100) + GRID_POSITION[1]
+            ))
+            if wire_instance == None: self.grid[wire_position] = wire
+
+            connections = wire.connections
+            flag = True
+
+            direction = MODIFIER_TO_STRING[(
+                wire_position[0] - other_position[0],
+                wire_position[1] - other_position[1]
+            )]
+            if isinstance(other_instance, MicroPointer):
+                flag = (direction != "up" and direction != "down")
+                other_instance.set_connected(flag)
+
+
+            if isinstance(other_instance, IOPort):
+                other_connections = other_instance.subwire.connections
+                other_connections.__dict__[MODIFIER_TO_STRING[(
+                    other_position[0] - wire_position[0],
+                    other_position[1] - wire_position[1]
+                )]] = True
+                other_instance.subwire.update_connections(other_connections)
+                other_instance.update_surf()
+            
+            connections.__dict__[direction] = flag
+            
+            wire.update_connections(connections)
+            
 
     def remove_wire(self, position: tuple[int, int]):
         """
@@ -306,12 +389,18 @@ class Grid(pygame.sprite.Sprite):
                 "left"
             ]
         ):
-            gotten = self.get(position[0], position[1], modifier)
-            if not isinstance(gotten, Wire): continue
-            
-            wire_current_neighbors = gotten.current_neighbors
-            wire_current_neighbors.__dict__[direction] = False
-            gotten.update_neighbors(wire_current_neighbors)
+            gotten = self.get(*position, modifier)
+            if isinstance(gotten, Wire):
+                wire_connections = gotten.connections
+                wire_connections.__dict__[direction] = False
+                gotten.update_connections(wire_connections)
+            elif isinstance(gotten, IOPort):
+                wire_connections = gotten.subwire.connections
+                wire_connections.__dict__[direction] = False
+                gotten.subwire.update_connections(wire_connections)
+                gotten.update_surf()
+            elif isinstance(gotten, MicroPointer):
+                gotten.set_connected(False)
 
     def do_sim_tick(self):
         """
@@ -339,12 +428,7 @@ class Grid(pygame.sprite.Sprite):
 
             neighbors = [
                 pos
-                for mod in [
-                    (1, 0),
-                    (-1, 0),
-                    (0, 1),
-                    (0, -1)
-                ]
+                for mod in (current_instance if isinstance(current_instance, Wire) else current_instance.subwire).connections.to_modifiers()
                 if self.get(*(pos := (current[0] + mod[0], current[1] + mod[1]))) != None
                 and pos not in visited
             ]
@@ -359,6 +443,7 @@ class Grid(pygame.sprite.Sprite):
                 elif isinstance(neighbor_instance, IOPort):
                     if neighbor_instance.is_output_port():
                         neighbor_instance.output_value = c_val
+                        neighbor_instance.update_surf()
                 elif isinstance(neighbor_instance, MicroPointer):
                     if neighbor_instance.portId != None:
                         if "in" in neighbor_instance.portId:
@@ -389,17 +474,20 @@ class Grid(pygame.sprite.Sprite):
             current_instance = self.get(*current)
             c_val = current_instance.value if isinstance(current_instance, Wire) else self.get(*current_instance.pointTo).__dict__[current_instance.portId]
 
-            neighbors = [
-                pos
-                for mod in [
-                    (1, 0),
-                    (-1, 0),
-                    (0, 1),
-                    (0, -1)
+
+            neighbors = None
+            if isinstance(current_instance, Wire):
+                neighbors = [
+                    pos
+                    for mod in current_instance.connections.to_modifiers()
+                    if self.get(*(pos := (current[0] + mod[0], current[1] + mod[1]))) != None
+                    and pos not in visited
                 ]
-                if self.get(*(pos := (current[0] + mod[0], current[1] + mod[1]))) != None
-                and pos not in visited
-            ]
+            else:
+                mod = current_instance.to_modifier()
+                neighbors = [
+                    (current[0] + mod[0], current[1] + mod[1])
+                ] if current_instance.connected else []
 
             #if the current instance is a micropointer, prevent it from adding other micropointers to the neighbor list 
             if isinstance(current_instance, MicroPointer):

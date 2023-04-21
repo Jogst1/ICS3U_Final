@@ -1,6 +1,6 @@
 Welcome to Merivale I/O! In this game, you play as a circuit designer.
 In each level, you will be given a task to complete, and will have to solve the given task using Microcontrollers and Wires. You can place a microcontroller on the work grid by pressing the E key, and remove one by pressing the Q key. 
-In order to place wires, you can click on a grid space, and to remove a wire, right click on the same grid space.
+In order to place wires, you can drag with left mouse button, and to remove a wire, right click on a grid space.
 <NEWPAGE>
 Given a task, you will have to connect wires and microcontrollers to the IO Ports on either side of the grid. 
 You will then have to program the microcontrollers with the Microcoded Hardware System (M.H.S.) language, detailed later in the tutorial.
