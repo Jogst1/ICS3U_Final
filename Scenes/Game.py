@@ -5,6 +5,7 @@ from Classes.ImageHelper import ImageHelper
 from Classes.TextRenderer import TextRenderer
 from Classes.Game.Grid import Grid
 from Classes.ImageButton import ImageButton
+from Classes.Game.IOGraph import IOGraph
 
 #set up some constants
 INSTRUCTIONS_POSITION = (1549, 145)
@@ -40,6 +41,17 @@ class Game():
         )
         self.sprite_group.add(instruction_text)
 
+        t = puzzle.example_testcase
+        self.io_graph = IOGraph(
+            t.inputs,
+            t.inputs2,
+            t.expected_outputs,
+            t.expected_outputs2
+        )
+        self.io_graph.rect = 20, 750
+        self.sprite_group.add(self.io_graph)
+
+
         #initialize a grid instance
         self.grid = Grid(puzzle.example_testcase.inputs, puzzle.example_testcase.inputs2)
 
@@ -50,6 +62,10 @@ class Game():
         #set up the step button, to advance the sim by one tick
         def step_button_onclick():
             self.grid.do_sim_tick()
+            self.io_graph.add_actual(
+                self.grid.get(14, 2).output_value,
+                self.grid.get(14, 4).output_value
+            )
         step_button = ImageButton(self.images.step_button, (1561, 856), step_button_onclick, 1.05)
         self.sprite_group.add(step_button)
 
@@ -76,6 +92,7 @@ class Game():
             self.advancing = False
             self.advcounter = 0
             self.grid.reset_sim()
+            self.io_graph.reset()
         reset_button = ImageButton(self.images.reset_button, (1802, 856), reset_button_onclick, 1.05)
         self.sprite_group.add(reset_button)
 
@@ -140,6 +157,10 @@ class Game():
                     self.advancing = False
                     self.advcounter = 0
                 self.grid.do_sim_tick()
+                self.io_graph.add_actual(
+                    self.grid.get(14, 2).output_value,
+                    self.grid.get(14, 4).output_value
+                )
             self.advcounter = (self.advcounter + 1) % 15
 
 
