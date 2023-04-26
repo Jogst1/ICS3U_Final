@@ -1,11 +1,12 @@
 import pygame
 import math
+import typing
 
 class ImageButton(pygame.sprite.Sprite):
     """
     A general purpose class for images as buttons. Allows for onclick events, and an expand-on-hover feature.
     """
-    def __init__(self, image: pygame.Surface, position: tuple, onclick, expandOnHover:float=None):
+    def __init__(self, image: pygame.Surface, position: tuple, onclick: typing.Callable, expandOnHover:float=None):
         """
         Parameters
         ----------
@@ -58,6 +59,7 @@ class ImageButton(pygame.sprite.Sprite):
             
             #check if the button should expand on hover, and is not already expanded
             if self.expandOnHover != None and self.expanded == False:
+
                 #scale the button by the given expandOnHover factor
                 self.surf = pygame.transform.scale(self.surf, (self.surf.get_size()[0] * self.expandOnHover, self.surf.get_size()[1] * self.expandOnHover))
                 #offset the button slightly to keep it centred
@@ -73,6 +75,7 @@ class ImageButton(pygame.sprite.Sprite):
                 self.rect.move_ip(self.expandXDiff/2, self.expandYDiff/2)
                 #disable the expanded flag
                 self.expanded = False
+
         
         #disable the debounce flag once the mouse is released
         if mouse_state == False:

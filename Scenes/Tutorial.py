@@ -3,7 +3,6 @@ import pygame
 from Classes.ImageButton import ImageButton
 from Classes.TextRenderer import TextRenderer
 from Classes.ImageHelper import ImageHelper
-from puzzles import puzzle1
 
 #set up some constants
 DONE_BUTTON_POSITION = (785, 865)
@@ -66,7 +65,7 @@ class Tutorial():
         done_button = ImageButton(
             self.images.done_button,
             DONE_BUTTON_POSITION,
-            lambda: change_fn(Game(screen, puzzle1, change_fn)),
+            lambda: change_fn(Game(screen, 0, change_fn)),
             1.05
         )
         self.sprite_group.add(done_button, main_text)

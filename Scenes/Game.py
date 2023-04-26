@@ -1,5 +1,7 @@
 #import various modules
 import pygame
+from enum import Enum
+from puzzles import puzzles
 from Classes.Puzzles.Puzzle import Puzzle
 from Classes.ImageHelper import ImageHelper
 from Classes.TextRenderer import TextRenderer
@@ -11,39 +13,48 @@ from Classes.Game.IOGraph import IOGraph
 INSTRUCTIONS_POSITION = (1549, 145)
 INSTRUCTIONS_SIZE = (353, 575)
 
+class Status(Enum):
+    Win=1
+    Lose=2
+    Playing=3
+
 class Game():
     """
     The main game scene
     """
-    def __init__(self, screen: pygame.Surface, puzzle: Puzzle, change_fn):
+    def __init__(self, screen: pygame.Surface, puzzleIdx: int, change_fn):
         """
         Parameters
         ----------
         screen:
             The Surface to blit to.
-        puzzle:
-            The puzzle to run.
+        puzzleIdx:
+            The index of the puzzle to run.
         change_fn:
             A function that changes the scene when provided with a new one.
         """
         #set up some self variables for use in the class
         self.screen = screen
-        self.puzzle = puzzle
+        self.change_fn = change_fn
+        self.puzzle = puzzles[puzzleIdx]
+        self.puzzleIndex = puzzleIdx
         self.images = ImageHelper(screen)
         self.sprite_group = pygame.sprite.Group()
+        self.status = Status.Playing
+
+        self.win_lose_buttons = [None, None]
 
         #set up a textrenderer to display the instructions
         instruction_text = TextRenderer(
-            puzzle.instructions,
+            self.puzzle.instructions,
             (0, 0, 0),
             pygame.font.Font("Assets/Fonts/IBMPlexMono-Medium.ttf", 24),
             pygame.Rect(INSTRUCTIONS_POSITION, INSTRUCTIONS_SIZE)
         )
         self.sprite_group.add(instruction_text)
 
-        t = puzzle.example_testcase
         self.io_graph = IOGraph(
-            t.inputs,
+            (t:=self.puzzle.example_testcase).inputs,
             t.inputs2,
             t.expected_outputs,
             t.expected_outputs2
@@ -53,7 +64,7 @@ class Game():
 
 
         #initialize a grid instance
-        self.grid = Grid(puzzle.example_testcase.inputs, puzzle.example_testcase.inputs2)
+        self.grid = Grid(self.puzzle.example_testcase.inputs, self.puzzle.example_testcase.inputs2)
 
         #set up some variables to keep track of when the advance button is being used
         self.advancing = False
@@ -127,16 +138,13 @@ class Game():
                 #if all values matched, increment the number of passed testcases
                 matches += int(output_match_count == len(test.expected_outputs))
 
-            #temporary until proper win screen is implemented
-            if matches == len(tests):
-                print("All tests passed")
-            else:
-                print("A test failed!")
+            self.status = Status(int(matches!=len(tests))+1)
             
             #reset the grid back to the example testcase
             self.grid.get(0, 2).values = self.puzzle.example_testcase.inputs
             self.grid.get(0, 4).values = self.puzzle.example_testcase.inputs2
             self.grid.reset_sim()
+            self.io_graph.reset()
 
         #finish adding the button
         check_tests_button = ImageButton(self.images.check_tests_button, (1561, 749), check_tests_button_onclick, 1.05)
@@ -150,6 +158,9 @@ class Game():
         """
         self.grid.update()
         self.sprite_group.update()
+        for btn in self.win_lose_buttons:
+            if btn != None:
+                btn.update()
 
         if self.advancing:
             if self.advcounter == 0:
@@ -164,6 +175,57 @@ class Game():
             self.advcounter = (self.advcounter + 1) % 15
 
 
+        if self.win_lose_buttons[0] == None:
+            if self.status == Status.Win:
+                def next_level_onclick():
+                    if self.puzzleIndex+1 == len(puzzles):
+                        #TODO: proper end game screen
+                        print("You finished all the puzzles! You win!")
+                        exit()
+                    else:
+                        self.change_fn(Game(self.screen, self.puzzleIndex+1, self.change_fn))
+
+                self.win_lose_buttons[0] = ImageButton(
+                    self.images.next_level_button,
+                    (730, 622),
+                    next_level_onclick,
+                    1.05
+                )
+
+                def keep_playing_onclick():
+                    self.status = Status.Playing
+
+                self.win_lose_buttons[1] = ImageButton(
+                    self.images.keep_playing_button,
+                    (730, 723),
+                    keep_playing_onclick,
+                    1.05
+                )
+            elif self.status == Status.Lose:
+                def try_again_onclick():
+                    self.status = Status.Playing
+
+                self.win_lose_buttons[0] = ImageButton(
+                    self.images.try_again_button,
+                    (730, 622),
+                    try_again_onclick,
+                    1.05
+                )
+
+                def quit_game_onclick():
+                    print("Thank you for playing Merivale I/O")
+                    exit()
+
+                self.win_lose_buttons[1] = ImageButton(
+                    self.images.fail_quit_button,
+                    (730, 723),
+                    quit_game_onclick,
+                    1.05
+                )
+        if self.status == Status.Playing:
+            self.win_lose_buttons = [None, None]
+
+
     def render(self):
         """
         Renders the Grid scene to the screen.
@@ -171,3 +233,11 @@ class Game():
         self.screen.blit(self.images.background, (0, 0))
         self.grid.render()
         for sprite in self.sprite_group: self.screen.blit(sprite.surf, sprite.rect)
+
+        if self.status != Status.Playing:
+            self.screen.blit(
+                self.images.win_screen if self.status == Status.Win else self.images.fail_screen,
+                (710, 240)
+            )
+            for btn in self.win_lose_buttons:
+                self.screen.blit(btn.surf, btn.rect)
