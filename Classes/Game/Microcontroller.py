@@ -17,6 +17,7 @@ COMMANDS = {
     "add": 1,
     "sub": 1,
     "mul": 1,
+    "not": 1,
     "tis": 2,
     "tgt": 2,
     "tlt": 2
@@ -52,6 +53,9 @@ def line_is_valid(line: str) -> bool:
     if words[0] not in COMMANDS.keys():
         #if the first "word" is a conditional
         if words[0] in CONDITIONALS:
+            #make sure second word is valid
+            if words[1] not in COMMANDS.keys():
+                return False
             #set the command to the seocnd "word"
             command = words[1]
             #set the words to be only the remaining args
@@ -133,7 +137,7 @@ class Microcontroller(pygame.sprite.Sprite):
                 self.__dict__[dst] = src
         def jmp(dst):
             jmp_line = min(dst if isinstance(dst, int) else self.__dict__[dst], 9)
-            self.current_line = jmp_line
+            self.current_sim_line = jmp_line
         def slp(amt):
             cycles_to_sleep = amt if isinstance(amt, int) else self.__dict__[amt]
             self.sleep_counter = cycles_to_sleep
@@ -151,20 +155,23 @@ class Microcontroller(pygame.sprite.Sprite):
             self.mhs = self.mhs % 1000
         def tis(x, y):
             x = self.__dict__[x] if isinstance(x, str) else x
-            y = self.__dict__[x] if isinstance(x, str) else x
+            y = self.__dict__[y] if isinstance(y, str) else y
 
             self.conditional_state = x==y
         def tgt(x, y):
             x = self.__dict__[x] if isinstance(x, str) else x
-            y = self.__dict__[x] if isinstance(x, str) else x
+            y = self.__dict__[y] if isinstance(y, str) else y
+
 
             self.conditional_state = x>y
         def tlt(x, y):
             x = self.__dict__[x] if isinstance(x, str) else x
-            y = self.__dict__[x] if isinstance(x, str) else x
+            y = self.__dict__[y] if isinstance(y, str) else y
 
             self.conditional_state = x<y
-
+        def _not(amt):
+            not_amt = amt if isinstance(amt, int) else self.__dict__[amt]
+            self.mhs = int(not bool(not_amt))
 
         #set up an object to map command strings to their associated functions
         self.command_handler = {
@@ -176,7 +183,8 @@ class Microcontroller(pygame.sprite.Sprite):
             "mul": mul,
             "tis": tis,
             "tgt": tgt,
-            "tlt": tlt
+            "tlt": tlt,
+            "not": _not
         }
 
         #update the surface to display initial register data
@@ -306,6 +314,7 @@ class Microcontroller(pygame.sprite.Sprite):
             #get the command and arguments
             words = line.split(" ")
             command = words[0]
+            
             args = [int(arg) if arg.isdigit() else arg for arg in words[1:]]
 
             #call command, and increment the linecounter

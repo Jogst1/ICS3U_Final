@@ -193,7 +193,7 @@ class Grid(pygame.sprite.Sprite):
             (+1, 0, "ou2"),
             (-1, +1, "ou1"),
             (0, +1, None),
-            (+1, +1, "ou2")
+            (+1, +1, "in2")
         ]:
             x = center_position[0] + modifier[0]
             y = center_position[1] + modifier[1]

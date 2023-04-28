@@ -27,6 +27,8 @@ tis: Test if two values are equal
 tgt: Test if the first value is greater than the other
 tlt: Test if the first value is lesser than the other
 <NEWPAGE>
+not: Returns the logical Not of a value. Returns 1 if the register or value supplied is 0, otherwise returns 0.
+ 
 Example Program:
 add 1
 mov mhs ics
