@@ -106,6 +106,7 @@ class Microcontroller(pygame.sprite.Sprite):
         self.lines = [""] * 10
         self.current_line = 0
         self.typing = False
+        self.cursor = 0
         self.line_errors = set()
 
 
@@ -201,45 +202,89 @@ class Microcontroller(pygame.sprite.Sprite):
             #and mouse position is inside the text rect
             if self.text_rect.collidepoint(*pygame.mouse.get_pos()):
                 #calculate the line that the mouse is hovering on, and set the current line to it
-                self.current_line = math.floor((pygame.mouse.get_pos()[1] - self.text_rect.topleft[1]) / 16)
+                mpos = pygame.mouse.get_pos()
+                self.current_line = (mpos[1] - self.text_rect.topleft[1]) // 16
+                self.cursor = min((mpos[0] - self.text_rect.topleft[0]) // 7, len(self.lines[self.current_line]))
                 #enable typing
                 self.typing = True
+                self.update_surf()
             else:
                 #disable typing
                 self.typing = False
+                self.update_surf()
 
         #if typing is enabled
         if self.typing:
             for event in events:
                 #if a key got pressed
                 if event.type == pygame.KEYDOWN:
-                    #if key is delete or backspace, remove one character from the current line
-                    if event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
-                        self.lines[self.current_line] = self.lines[self.current_line][:-1]
+                    self.handle_typing(event.key, event.unicode)
                     
-                    #if key is enter/return, go to next line
-                    elif event.key == pygame.K_RETURN:
-                        self.current_line += 1
-                        #if there are no more lines, stop typing
-                        if self.current_line > 9:
-                            self.typing = False
 
-                    #if key is e or q, stop typing, as no instructions/registers have these characters, and they are used for managing miccrocontrollers
-                    elif event.key == pygame.K_e or event.key == pygame.K_q:
-                        self.typing = False
-                    
-                    #if key is anything else, add it's unicode representation to the current line
-                    else:
-                        self.lines[self.current_line] += event.unicode
+    def handle_typing(self, key: int, unicode):
+        #if key is delete or backspace, remove one character from the current line
+        if key == pygame.K_DELETE or key == pygame.K_BACKSPACE:
+            self.lines[self.current_line] = self.lines[self.current_line][:self.cursor-1] + self.lines[self.current_line][self.cursor:]
+            self.cursor -= 1
+            
+            if self.cursor < 0:
+                self.current_line -= 1
+                if self.current_line < 0:
+                    self.current_line = 0
+                self.lines[self.current_line] += self.lines[self.current_line + 1]
+                self.lines[self.current_line + 1] = ""
+                self.cursor = len(self.lines[self.current_line])
+        
+        #if key is enter/return, go to next line
+        elif key == pygame.K_RETURN:
+            if self.cursor < len(self.lines[self.current_line]):
+                self.lines[self.current_line+1] = self.lines[self.current_line][self.cursor:] + self.lines[self.current_line+1]
+                self.lines[self.current_line] = self.lines[self.current_line][:self.cursor]
 
-                    #check if the new edited line is valid, and if it is, add it to the line_errors, otherwise remove it.
-                    if line_is_valid(self.lines[self.current_line]):
-                        self.line_errors.discard(self.current_line)
-                    else:
-                        self.line_errors.add(self.current_line)
+            self.current_line += 1
+            #if there are no more lines, stop typing
+            if self.current_line > 9:
+                self.typing = False
 
-                    #update the surface to display the new line data
-                    self.update_surf()
+            self.cursor = 0
+
+        #if key is e or q, stop typing, as no instructions/registers have these characters, and they are used for managing miccrocontrollers
+        elif key == pygame.K_e or key == pygame.K_q:
+            self.typing = False
+
+        #if left or right key is pressed, move cursor left or right 
+        elif key in [pygame.K_LEFT, pygame.K_RIGHT]:
+            self.cursor += [pygame.K_LEFT, pygame.K_RIGHT].index(key) * 2 - 1
+            if self.cursor < 0:
+                self.current_line = max(0, self.current_line-1)
+                self.cursor = len(self.lines[self.current_line])
+            elif self.cursor > len(self.lines[self.current_line]):
+                self.current_line = min(10, self.current_line+1)
+                self.cursor = 0
+
+        #if up or down key is pressed, move cursor up or down
+        elif key in [pygame.K_UP, pygame.K_DOWN]:
+            self.current_line += [pygame.K_UP, pygame.K_DOWN].index(key) * 2 - 1
+            self.current_line = self.current_line % 10
+
+            self.cursor = min(len(self.lines[self.current_line]), self.cursor)
+        
+        #if key is alphanumeric, add it's unicode representation to the current line
+        elif unicode.isalnum():
+            l = self.lines[self.current_line]
+            
+            self.lines[self.current_line] = l[:self.cursor+1] + unicode + l[self.cursor+1:]
+            self.cursor += 1
+
+        #check if the new edited line is valid, and if it is, add it to the line_errors, otherwise remove it.
+        if line_is_valid(self.lines[self.current_line]):
+            self.line_errors.discard(self.current_line)
+        else:
+            self.line_errors.add(self.current_line)
+
+        #update the surface to display the new line data
+        self.update_surf()
+
 
     def update_surf(self):
         """
@@ -269,6 +314,15 @@ class Microcontroller(pygame.sprite.Sprite):
         ics_rect = ics_textrender.get_rect()
         ics_rect.midtop = (205+25, 15 + 25 + 100)
         self.surf.blit(ics_textrender, ics_rect)
+
+        #render cursor
+        if self.typing:
+            pygame.draw.line(
+                self.surf,
+                (0, 0, 0),
+                (TEXT_OFFSET[0] + (self.cursor * 7), TEXT_OFFSET[1] + (self.current_line * 16)),
+                (TEXT_OFFSET[0] + (self.cursor * 7), TEXT_OFFSET[1] + ((self.current_line + 1) * 16))
+            )
             
     def do_sim_tick(self):
         """
