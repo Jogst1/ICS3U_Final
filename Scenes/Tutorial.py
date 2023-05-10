@@ -28,6 +28,10 @@ class Tutorial():
         #import the game scene to switch to when the user is finished the tutorial.
         from Scenes.Game import Game
 
+        #play music
+        pygame.mixer_music.load("Assets/Music/text_screen.mp3")
+        pygame.mixer_music.play(-1, 4)
+
         #set up some attributes for general class use
         self.screen = screen
         self.images = ImageHelper(screen)

@@ -54,6 +54,9 @@ class ImageButton(pygame.sprite.Sprite):
             if mouse_state == True and self.debounce == False:
                 #enable debounce
                 self.debounce = True
+                #play the onclick noise
+                pygame.mixer.Sound("Assets/Sounds/button_onclick.wav").play()
+
                 #trigger the onclick event
                 self.onclick()
             
@@ -61,11 +64,14 @@ class ImageButton(pygame.sprite.Sprite):
             if self.expandOnHover != None and self.expanded == False:
 
                 #scale the button by the given expandOnHover factor
-                self.surf = pygame.transform.scale(self.surf, (self.surf.get_size()[0] * self.expandOnHover, self.surf.get_size()[1] * self.expandOnHover))
+                self.surf = pygame.transform.smoothscale(self.surf, (self.surf.get_size()[0] * self.expandOnHover, self.surf.get_size()[1] * self.expandOnHover))
                 #offset the button slightly to keep it centred
                 self.rect.move_ip(self.expandXDiff/-2, self.expandYDiff/-2)
                 #enable the expanded flag
                 self.expanded = True
+                s=pygame.mixer.Sound("Assets/Sounds/button_hover.wav")
+                s.set_volume(0.2)
+                s.play()
         else:
             #if the mouse isn't hovering, and the button is expanded,
             if self.expanded == True:

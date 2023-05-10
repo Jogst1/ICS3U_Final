@@ -202,6 +202,9 @@ class Grid(pygame.sprite.Sprite):
                 x * 100 + GRID_POSITION[0],
                 y * 100 + GRID_POSITION[1]
             )
+
+        #play the sfx
+        pygame.mixer.Sound("Assets/Sounds/micro_place.wav").play()
             
             
     def remove_microcontroller(self, position: tuple[int, int]):
@@ -250,6 +253,9 @@ class Grid(pygame.sprite.Sprite):
                         wire_connections.__dict__[direction] = False
                         gotten.update_connections(wire_connections)
 
+        #play the sfx
+        pygame.mixer.Sound("Assets/Sounds/micro_delete.wav").play()
+
 
     def add_wire(self, position1: tuple[int, int], position2: tuple[int, int]):
         """
@@ -284,6 +290,8 @@ class Grid(pygame.sprite.Sprite):
                             (position1[1] * 100) + GRID_POSITION[1]
                         )
                     )
+                    pygame.mixer.Sound("Assets/Sounds/wire_place.wav").play()
+
             else:
                 for main, maininstance, neighbor in [(position1, instance1, position2), (position2, instance2, position1)]:
                     if isinstance(maininstance, Wire):
@@ -315,6 +323,8 @@ class Grid(pygame.sprite.Sprite):
                                 (main[1] * 100) + GRID_POSITION[1]
                             )
                         )
+                pygame.mixer.Sound("Assets/Sounds/wire_place.wav").play()
+                
         elif (
             (isinstance(instance1, (Wire, type(None))) and (isinstance(instance2, (IOPort, MicroPointer)))) or
             (isinstance(instance2, (Wire, type(None))) and (isinstance(instance1, (IOPort, MicroPointer))))
@@ -361,7 +371,10 @@ class Grid(pygame.sprite.Sprite):
             connections.__dict__[direction] = flag
             
             wire.update_connections(connections)
-            
+            pygame.mixer.Sound("Assets/Sounds/wire_place.wav").play()
+
+
+        
 
     def remove_wire(self, position: tuple[int, int]):
         """
@@ -401,6 +414,9 @@ class Grid(pygame.sprite.Sprite):
                 gotten.update_surf()
             elif isinstance(gotten, MicroPointer):
                 gotten.set_connected(False)
+
+        #play the sfx
+        pygame.mixer.Sound("Assets/Sounds/wire_delete.wav").play()
 
     def do_sim_tick(self):
         """

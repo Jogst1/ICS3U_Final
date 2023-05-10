@@ -26,6 +26,10 @@ class MainMenu:
         from Scenes.Credits import Credits
         from Scenes.Tutorial import Tutorial
 
+        #play music
+        pygame.mixer_music.load("Assets/Music/main_menu.mp3")
+        pygame.mixer_music.play(-1, 1.5)
+
         #set up some attributes for general class use
         self.screen = screen
         self.images = ImageHelper(screen)

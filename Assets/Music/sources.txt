@@ -1,0 +1,7 @@
+main_menu.mp3: A Horde of One - Disasterpeace (Hyper Light Fragments) - https://youtu.be/wUtOeqCB1mk
+text_screen.mp3: Seeds of the Crown - Disasterpeace (Hyper Light Drifter) - https://youtu.be/gibJnlT1idY
+game_1.mp3: The Winding Ridge - Disasterpeace (Hyper Light Drifter) - https://youtu.be/NvIKpAhFGOg
+game_2.mp3: Acropolis Falls - Disasterpeace (Hyper Light Drifter) - https://youtu.be/r2uHsX6DtA0 
+game_3.mp3: A Chorus of Tongues - Disasterpeace (Hyper Light Drifter) - https://youtu.be/wbEPlCiMy1A 
+game_4.mp3: Panacea - Disasterpeace (Hyper Light Drifter) - https://youtu.be/NaG4BW2llOI
+end_game.mp3: A Reflective Lament - Steventhedreamer (Synchobonk Collection) - https://youtu.be/g2FrUEwdTKU

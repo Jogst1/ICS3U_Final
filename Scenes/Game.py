@@ -33,6 +33,11 @@ class Game():
         change_fn:
             A function that changes the scene when provided with a new one.
         """
+
+        #play music
+        pygame.mixer_music.load(f"Assets/Music/game_{puzzleIdx+1}.mp3")
+        pygame.mixer_music.play(-1)
+
         #set up some self variables for use in the class
         self.screen = screen
         self.change_fn = change_fn
@@ -139,6 +144,10 @@ class Game():
                 matches += int(output_match_count == len(test.expected_outputs))
 
             self.status = Status(int(matches!=len(tests))+1)
+            if self.status == Status.Win:
+                pygame.mixer.Sound("Assets/Sounds/solve.wav").play()
+            elif self.status == Status.Lose:
+                pygame.mixer.Sound("Assets/Sounds/solve.wav").play()
             
             #reset the grid back to the example testcase
             self.grid.get(0, 2).values = self.puzzle.example_testcase.inputs

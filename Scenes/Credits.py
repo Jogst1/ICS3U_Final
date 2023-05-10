@@ -26,6 +26,10 @@ class Credits():
         #import the mainmenu scene to switch back to when the user is finished with the credits
         from Scenes.MainMenu import MainMenu
 
+        #play music
+        pygame.mixer_music.load("Assets/Music/text_screen.mp3")
+        pygame.mixer_music.play(-1, 4)
+
         #set up some attributes for general class use
         self.screen = screen
         self.images = ImageHelper(screen)
