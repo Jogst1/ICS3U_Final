@@ -1,5 +1,19 @@
-TODO: Credits go here!
-<NEWPAGE>
-TODO: Sources go here!
-<NEWPAGE>
-Bla blalblalb alablalaal testing testing 3 2 1 yeah
+Programming, Art, Design, Puzzles: Justin Ogston 
+ 
+Guidance, Testing, Overall Help: Ms. Edwards 
+ 
+Sound Effects from Shenzhen I/O, by Zachtronics 
+ 
+Inspiration: Shenzhen I/O, by Zachtronics
+ 
+Educational Materials, Used Code, Images: see https://docs.google.com/document/d/1-7uoMtHautyOP 
+wjpPivfaJ6HS_USsd2cKbdPfraUUYE/edit?usp=sharing
+<NEWPAGE>Music Credits: 
+Main Menu: A Horde of One - Disasterpeace 
+Credits/Tutorial: Seeds of the Crown - Disasterpeace 
+Game 1: The Winding Ridge - Disasterpeace 
+Game 2: Acropolis Falls - Disasterpeace 
+Game 3: A Chorus of Tongues - Disasterpeace 
+Game 4: Panacea - Disasterpeace 
+End Screen: A Reflective Lament - Steventhedreamer 
+Most music is from Disasterpeace's Hyper Light Drifter Soundtrack. The music and the game are exceptional, and I would highly reccomend them. 

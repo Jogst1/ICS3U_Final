@@ -270,7 +270,7 @@ class Microcontroller(pygame.sprite.Sprite):
             self.cursor = min(len(self.lines[self.current_line]), self.cursor)
         
         #if key is alphanumeric, add it's unicode representation to the current line
-        elif unicode.isalnum():
+        elif unicode.isalnum() or unicode in [" ", "+", "-"]:
             l = self.lines[self.current_line]
             
             self.lines[self.current_line] = l[:self.cursor+1] + unicode + l[self.cursor+1:]

@@ -30,7 +30,7 @@ clock = pygame.time.Clock()
 #variable to keep track of if the game is running
 game_running = True
 #variable to keep track of if the volume slider open
-volume_open = True
+volume_open = False
 #variable for debouncing button clicks for the volume control
 volume_debounce = False
 
@@ -83,7 +83,6 @@ while game_running:
 
         if mb1p:
             if VOLUME_ADJUST_RECT.collidepoint(*mpos):
-                print((125-mpos[1])/100)
                 pygame.mixer_music.set_volume(max(0, (125-mpos[1])/100))
     
 

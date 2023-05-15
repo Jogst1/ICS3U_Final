@@ -34,7 +34,7 @@ class Credits():
         self.screen = screen
         self.images = ImageHelper(screen)
         with open("Assets/Credits/credits.txt", "r") as data:
-            self.pages = data.read().replace("\n", "").split("<NEWPAGE>")
+            self.pages = data.read().split("<NEWPAGE>")
         self.page_index = 0 #keeps track of the current page the user is on
         self.sprite_group = pygame.sprite.Group()
 
@@ -43,7 +43,7 @@ class Credits():
         main_text = TextRenderer(
             self.pages[self.page_index],
             (0, 0, 0),
-            pygame.font.Font("Assets/Fonts/IBMPlexMono-Medium.ttf", 36),
+            pygame.font.Font("Assets/Fonts/IBMPlexMono-Medium.ttf", 30),
             pygame.Rect((518, 278), (884, 525))
         )
         def onclick_back_button():

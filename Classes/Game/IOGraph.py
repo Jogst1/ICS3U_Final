@@ -41,13 +41,22 @@ class IOGraph(pygame.sprite.Sprite):
                     4
                 )
                 if num != 0:
-                    pygame.draw.line(
-                        self.surf,
-                        RED_COLOR,
-                        (start_x, prev_y),
-                        (start_x, height-1),
-                        4
-                    )
+                    if prev_y > height:
+                        pygame.draw.line(
+                            self.surf,
+                            RED_COLOR,
+                            (start_x, prev_y),
+                            (start_x, height-1),
+                            4
+                        )
+                    else:
+                        pygame.draw.line(
+                            self.surf,
+                            RED_COLOR,
+                            (start_x, prev_y-3),
+                            (start_x, height+1),
+                            4
+                        )
                     prev_y = value_to_height(item)+2
 
                 text_render = FONT.render(str(item), True, RED_COLOR)

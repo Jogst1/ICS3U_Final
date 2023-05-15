@@ -1,5 +1,7 @@
 #import various modules
 import pygame
+import pygame.gfxdraw
+from math import *
 from enum import Enum
 from puzzles import puzzles
 from Classes.Puzzles.Puzzle import Puzzle
@@ -12,6 +14,37 @@ from Classes.Game.IOGraph import IOGraph
 #set up some constants
 INSTRUCTIONS_POSITION = (1549, 145)
 INSTRUCTIONS_SIZE = (353, 575)
+
+#taken from https://stackoverflow.com/questions/68522726/how-to-set-alpha-transparency-property-using-pygame-draw-line
+def aaline(surface, color, start_pos, end_pos, width=1):
+    """ Draws wide transparent anti-aliased lines. """
+    # ref https://stackoverflow.com/a/30599392/355230
+
+    x0, y0 = start_pos
+    x1, y1 = end_pos
+    midpnt_x, midpnt_y = (x0+x1)/2, (y0+y1)/2  # Center of line segment.
+    length = hypot(x1-x0, y1-y0)
+    angle = atan2(y0-y1, x0-x1)  # Slope of line.
+    width2, length2 = width/2, length/2
+    sin_ang, cos_ang = sin(angle), cos(angle)
+
+    width2_sin_ang  = width2*sin_ang
+    width2_cos_ang  = width2*cos_ang
+    length2_sin_ang = length2*sin_ang
+    length2_cos_ang = length2*cos_ang
+
+    # Calculate box ends.
+    ul = (midpnt_x + length2_cos_ang - width2_sin_ang,
+          midpnt_y + width2_cos_ang  + length2_sin_ang)
+    ur = (midpnt_x - length2_cos_ang - width2_sin_ang,
+          midpnt_y + width2_cos_ang  - length2_sin_ang)
+    bl = (midpnt_x + length2_cos_ang + width2_sin_ang,
+          midpnt_y - width2_cos_ang  + length2_sin_ang)
+    br = (midpnt_x - length2_cos_ang + width2_sin_ang,
+          midpnt_y - width2_cos_ang  - length2_sin_ang)
+
+    pygame.gfxdraw.aapolygon(surface, (ul, ur, br, bl), color)
+    pygame.gfxdraw.filled_polygon(surface, (ul, ur, br, bl), color)
 
 class Status(Enum):
     Win=1
@@ -46,6 +79,7 @@ class Game():
         self.images = ImageHelper(screen)
         self.sprite_group = pygame.sprite.Group()
         self.status = Status.Playing
+        self.checking = False
 
         self.win_lose_buttons = [None, None]
 
@@ -77,6 +111,9 @@ class Game():
 
         #set up the step button, to advance the sim by one tick
         def step_button_onclick():
+            #if advancing, or the winlose screen is open, the button should do nothing
+            if self.advancing or self.status != Status.Playing: return
+
             self.grid.do_sim_tick()
             self.io_graph.add_actual(
                 self.grid.get(14, 2).output_value,
@@ -93,9 +130,11 @@ class Game():
         quit_button = ImageButton(self.images.quit_button, (1554, 953), quit_button_onclick, 1.05)
         self.sprite_group.add(quit_button)
 
-
         #set up the advance button, to repeatedly tick the simulation
         def advance_button_onclick():
+            # if winlose screen is open, disable button
+            if self.status != Status.Playing: return
+
             self.advancing = not self.advancing
             if self.advancing == False:
                 self.advcounter = 0
@@ -105,6 +144,9 @@ class Game():
 
         #set up the button to reset the simulation
         def reset_button_onclick():
+            # if winlose screen is open, disable button
+            if self.status != Status.Playing: return
+
             self.advancing = False
             self.advcounter = 0
             self.grid.reset_sim()
@@ -114,7 +156,14 @@ class Game():
 
         #set up the button to check tests 
         def check_tests_button_onclick():
-            #first, disable advancement
+            #enable checking flag, if already enabled then do not continue
+            if self.checking: return
+            self.checking = True
+
+            #if winlose screen is open, disable button (if winlose screen is open the current sol'n has been checked)
+            if self.status != Status.Playing: return
+
+            #disable advancement
             self.advancing = False
             self.advcounter = 0
 
@@ -154,6 +203,8 @@ class Game():
             self.grid.get(0, 4).values = self.puzzle.example_testcase.inputs2
             self.grid.reset_sim()
             self.io_graph.reset()
+
+            self.checking = False
 
         #finish adding the button
         check_tests_button = ImageButton(self.images.check_tests_button, (1561, 749), check_tests_button_onclick, 1.05)
@@ -243,6 +294,12 @@ class Game():
         self.grid.render()
         for sprite in self.sprite_group: self.screen.blit(sprite.surf, sprite.rect)
 
+        #if advancing, draw a cross over step button to indicate it is disabled
+        if self.advancing:
+            pygame.draw.line(self.screen, (163, 49, 35), (1561-5, 856-5), (1561+95, 856+95), 8)
+            pygame.draw.line(self.screen, (163, 49, 35), (1561+95, 856-5), (1561-5, 856+95), 8)
+
+
         if self.status != Status.Playing:
             self.screen.blit(
                 self.images.win_screen if self.status == Status.Win else self.images.fail_screen,
@@ -250,3 +307,12 @@ class Game():
             )
             for btn in self.win_lose_buttons:
                 self.screen.blit(btn.surf, btn.rect)
+
+            
+            #draw a cross over all buttons to indicate they are disabled
+            for btnX in [1561, 1682, 1802]:
+                pygame.draw.line(self.screen, (163, 49, 35), (btnX-5, 856-5), (btnX+95, 856+95), 8)
+                pygame.draw.line(self.screen, (163, 49, 35), (btnX+95, 856-5), (btnX-5, 856+95), 8)
+            #checktests
+            aaline(self.screen, (163, 49, 35), (1561-10, 749-3), (1561+329+10, 749+97+3), 8)
+            aaline(self.screen, (163, 49, 35), (1561-10, 749+97+3), (1561+329+10, 749-3), 8)

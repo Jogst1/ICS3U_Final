@@ -7,8 +7,9 @@ You will then have to program the microcontrollers with the Microcoded Hardware 
 Once you are finished designing your solution, you may test it with the Step, Advance, and Reset buttons, which will play through a simulation. 
 <NEWPAGE>
 Once you are happy with how your solution works, you can check it for correctness with the Check Tests button. 
-(IN-DEV NOTE): Right now, checking tests is incomplete, and instead of a GUI screen, will just log either a success or failure to the console. (END IN-DEV NOTE) 
-The M.H.S language details can be found on the next page.
+M.H.S programs are structured line by line, with each line containing a command, then one or two arguments.
+Microcontrollers have 6 "registers", which are in1 and in2 for input, ou1 and ou2 for output, and mhs and ics for internal data.
+M.H.S language details can be found next.
 <NEWPAGE>
 M.H.S. Instructions:
 mov: Move a value (number or register) into a register. Ex: `mov in1 mhs`

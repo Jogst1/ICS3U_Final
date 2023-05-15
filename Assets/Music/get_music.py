@@ -31,6 +31,3 @@ def download():
             print("Successfully downloaded "+mp3_name)
 
         os.rmdir(TEMP_DIR)
-
-
-print(is_downloaded())
