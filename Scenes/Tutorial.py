@@ -1,5 +1,6 @@
 #import various classes needed in the main class
 import pygame
+import webbrowser
 from Classes.ImageButton import ImageButton
 from Classes.TextRenderer import TextRenderer
 from Classes.ImageHelper import ImageHelper
@@ -8,6 +9,9 @@ from Classes.ImageHelper import ImageHelper
 DONE_BUTTON_POSITION = (785, 865)
 BACK_BUTTON_POSITION = (410, 865)
 NEXT_BUTTON_POSITION = (1150, 865)
+BROWSER_BUTTON_POSITION = (1545, 404)
+
+TUTORIAL_WEB_LINK = "https://github.com/Jogst1/ICS3U_Final/blob/8e9db12fed113a8cf4a57294005a3941667f9ce8/Assets/Tutorial/tutorial.md"
 
 FONT = pygame.font.Font("Assets/Fonts/IBMPlexMono-Medium.ttf", 36)
 
@@ -73,6 +77,13 @@ class Tutorial():
             1.05
         )
         self.sprite_group.add(done_button, main_text)
+        browser_button = ImageButton(
+            self.images.browser_button,
+            BROWSER_BUTTON_POSITION,
+            lambda: webbrowser.open(TUTORIAL_WEB_LINK),
+            1.03
+        )
+        self.sprite_group.add(browser_button)
         
     def update(self):
         """
