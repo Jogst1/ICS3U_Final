@@ -10,6 +10,7 @@ DONE_BUTTON_POSITION = (785, 865)
 BACK_BUTTON_POSITION = (410, 865)
 NEXT_BUTTON_POSITION = (1150, 865)
 BROWSER_BUTTON_POSITION = (1545, 404)
+QUIT_BUTTON_POSITION = (1737, 1021)
 
 TUTORIAL_WEB_LINK = "https://github.com/Jogst1/ICS3U_Final/blob/8e9db12fed113a8cf4a57294005a3941667f9ce8/Assets/Tutorial/tutorial.md"
 
@@ -83,7 +84,13 @@ class Tutorial():
             lambda: webbrowser.open(TUTORIAL_WEB_LINK),
             1.03
         )
-        self.sprite_group.add(browser_button)
+        quit_button = ImageButton(
+            pygame.transform.smoothscale_by(pygame.image.load("Assets/Game/quit_button.png").convert_alpha(screen), 0.5),
+            QUIT_BUTTON_POSITION,
+            lambda: exit(),
+            1.05
+        )
+        self.sprite_group.add(browser_button, quit_button)
         
     def update(self):
         """

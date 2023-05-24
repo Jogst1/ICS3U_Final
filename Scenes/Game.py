@@ -194,9 +194,9 @@ class Game():
 
             self.status = Status(int(matches!=len(tests))+1)
             if self.status == Status.Win:
-                pygame.mixer.Sound("Assets/Sounds/solve.wav").play()
+                pygame.mixer.Sound("Assets/Sounds/solve.mp3").play()
             elif self.status == Status.Lose:
-                pygame.mixer.Sound("Assets/Sounds/solve.wav").play()
+                pygame.mixer.Sound("Assets/Sounds/solve.mp3").play()
             
             #reset the grid back to the example testcase
             self.grid.get(0, 2).values = self.puzzle.example_testcase.inputs

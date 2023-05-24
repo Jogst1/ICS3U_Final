@@ -6,6 +6,7 @@ from Classes.ImageHelper import ImageHelper
 #set up some constants
 START_BUTTON_POSITION = (526, 452)
 CREDITS_BUTTON_POSITION = (489, 676)
+QUIT_BUTTON_POSITION = (1737, 1021)
 
 class MainMenu:
     """
@@ -46,7 +47,12 @@ class MainMenu:
                                      lambda: change_fn(Credits(screen, change_fn)),
                                      1.05
                                     )
-        self.sprite_group.add(start_button, credits_button)
+        quit_button = ImageButton(pygame.transform.smoothscale_by(pygame.image.load("Assets/Game/quit_button.png").convert_alpha(screen), 0.5),
+                                    QUIT_BUTTON_POSITION,
+                                    lambda: exit(),
+                                    1.05
+                                 )
+        self.sprite_group.add(start_button, credits_button, quit_button)
 
     def update(self):
         """

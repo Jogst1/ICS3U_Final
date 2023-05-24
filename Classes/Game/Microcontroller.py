@@ -122,6 +122,7 @@ class Microcontroller(pygame.sprite.Sprite):
         self.sleep_counter = 1
         self.current_sim_line = 0
         self.conditional_state = None
+        self.typing_interval = 0
 
         # define functions for each M.H.S. instruction
         def mov(src, dst):
@@ -197,6 +198,9 @@ class Microcontroller(pygame.sprite.Sprite):
         Given a list of pygame events, update the microcontroller. Handles user input, typing, etc.
         """
 
+        self.typing_interval = (self.typing_interval + 1) % 10
+        keys = pygame.key.get_pressed()
+
         # if left mouse is pressed
         if pygame.mouse.get_pressed()[0]:
             #and mouse position is inside the text rect
@@ -215,16 +219,32 @@ class Microcontroller(pygame.sprite.Sprite):
 
         #if typing is enabled
         if self.typing:
+
+            already_handled_keys = []
+
+            if self.typing_interval == 6:
+                if (keys[pygame.K_DELETE] or keys[pygame.K_BACKSPACE]):
+                    self.handle_typing(pygame.K_DELETE, "Uni Code? Like a computer science course you'd take in university?")
+                    already_handled_keys.append(pygame.K_DELETE)
+                    already_handled_keys.append(pygame.K_BACKSPACE)
+                for key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]:
+                    if keys[key]:
+                        self.handle_typing(key, "https://i.imgur.com/NHrjuSq.png")
+                        already_handled_keys.append(key)
+
             for event in events:
                 #if a key got pressed
                 if event.type == pygame.KEYDOWN:
-                    self.handle_typing(event.key, event.unicode)
+                    if event.key not in already_handled_keys:
+                        self.handle_typing(event.key, event.unicode)
                     
 
     def handle_typing(self, key: int, unicode):
+        #store previous line number (right now current, may be changed)
+        prev_line = self.current_line
+
         #if key is delete or backspace, remove one character from the current line
         if key == pygame.K_DELETE or key == pygame.K_BACKSPACE:
-            self.lines[self.current_line] = self.lines[self.current_line][:self.cursor-1] + self.lines[self.current_line][self.cursor:]
             self.cursor -= 1
             
             if self.cursor < 0:
@@ -234,6 +254,8 @@ class Microcontroller(pygame.sprite.Sprite):
                 self.lines[self.current_line] += self.lines[self.current_line + 1]
                 self.lines[self.current_line + 1] = ""
                 self.cursor = len(self.lines[self.current_line])
+            else:
+                self.lines[self.current_line] = self.lines[self.current_line][:self.cursor] + self.lines[self.current_line][self.cursor+1:]
         
         #if key is enter/return, go to next line
         elif key == pygame.K_RETURN:
@@ -269,11 +291,11 @@ class Microcontroller(pygame.sprite.Sprite):
 
             self.cursor = min(len(self.lines[self.current_line]), self.cursor)
         
-        #if key is alphanumeric, add it's unicode representation to the current line
+        #if key is alphanumeric or one of the other desired characters, add it's unicode representation to the current line
         elif unicode.isalnum() or unicode in [" ", "+", "-"]:
             l = self.lines[self.current_line]
             
-            self.lines[self.current_line] = l[:self.cursor+1] + unicode + l[self.cursor+1:]
+            self.lines[self.current_line] = l[:self.cursor] + unicode + l[self.cursor:]
             self.cursor += 1
 
         #check if the new edited line is valid, and if it is, add it to the line_errors, otherwise remove it.
@@ -281,6 +303,12 @@ class Microcontroller(pygame.sprite.Sprite):
             self.line_errors.discard(self.current_line)
         else:
             self.line_errors.add(self.current_line)
+
+        if prev_line != self.current_line:
+            if line_is_valid(self.lines[prev_line]):
+                self.line_errors.discard(prev_line)
+            else:
+                self.line_errors.add(prev_line)
 
         #update the surface to display the new line data
         self.update_surf()

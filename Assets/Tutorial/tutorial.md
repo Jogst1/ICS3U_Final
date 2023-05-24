@@ -21,18 +21,24 @@
 
 
 # Merivale I/O
-Welcome to Merivale I/O! This document will prepare you for designing solutions to various tasks and puzzles!
+Welcome to Merivale I/O! This document will prepare you for designing solutions to various tasks and puzzles!  
+You will likely want to leave this open as you play the game, to refer back to over time.
 
 ## Premise
 In Merivale I/O, you design circuits. Each level, you are given a task to complete, and need to come up with a solution using the available Microcontrollers and Wires.  
-To place wires, click with your mouse on a grid square, and to remove wires, right click.  
+To place wires, click and drag with your mouse between grid squares, and to remove wires, right click.  
+<img src="https://i.imgur.com/XthgFmG.gif" alt="Placement of Wires" height=200>  
 To place a microcontroller, click the `E` key while hovering over a grid square with your mouse. To remove a microcontroller, press `Q` while hovering over one.  
+<img src="https://i.imgur.com/mnVxTPl.gif" alt="Placement of Wires" height=200>  
   
 ## Completing Tasks
 Given a task, you will place microcontrollers on the grid, then connect them together with wires. You will also need to connect microcontrollers to the input and/or output ports located on the grid.  
 After you've created a layout, you will need to program the controllers with the `Microcoded Hardware System` (M.H.S. for short), a custom-built programming language, based on the `MCxxxx` language for similar processors.  
-Once finished designing your solution, you can test it by walking through tick-by-tick with the `Step` button.  
-You can also run through the whole program with the `Advance` button, or try again with the `Reset` button.
+Once finished designing your solution, you can test it by walking through tick-by-tick with the `Step` button:  
+<img src="https://i.imgur.com/4ZDlc5e.png" alt="Step Button" height=75>  
+You can also run through the whole program with the `Advance` button, or try again with the `Reset` button.  
+<img src="https://i.imgur.com/eyq1Num.png" alt="Advance Button" height=75>
+<img src="https://i.imgur.com/du1O5DU.png" alt="Reset Button" height=75>  
 
 # Microcoded Hardware System
 The M.H.S. language is relatively simple. Programs are structured into lines, and each line contains one command, followed by one or two arguments, depending on the command.  

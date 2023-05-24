@@ -204,7 +204,7 @@ class Grid(pygame.sprite.Sprite):
             )
 
         #play the sfx
-        pygame.mixer.Sound("Assets/Sounds/micro_place.wav").play()
+        pygame.mixer.Sound("Assets/Sounds/micro_place.mp3").play()
             
             
     def remove_microcontroller(self, position: tuple[int, int]):
@@ -254,7 +254,7 @@ class Grid(pygame.sprite.Sprite):
                         gotten.update_connections(wire_connections)
 
         #play the sfx
-        pygame.mixer.Sound("Assets/Sounds/micro_delete.wav").play()
+        pygame.mixer.Sound("Assets/Sounds/micro_delete.mp3").play()
 
 
     def add_wire(self, position1: tuple[int, int], position2: tuple[int, int]):
@@ -280,8 +280,11 @@ class Grid(pygame.sprite.Sprite):
         #make sure it isn't asking to add a diagonal wire
         if abs(position1[0] - position2[0]) > 0 and abs(position1[1] - position2[1]) > 0: return
 
+        #if both positions are wires, Nones, or one of each
         if isinstance(instance1, (Wire, type(None))) and isinstance(instance2, (Wire, type(None))):
+            #if requesting to place singular wire in 1 grid spot, no other connections
             if position1==position2:
+                #make sure there's nothing there already
                 if instance1 == None:
                     self.grid[position1] = Wire(
                         Neighbors(*([False]*4)),
@@ -290,9 +293,10 @@ class Grid(pygame.sprite.Sprite):
                             (position1[1] * 100) + GRID_POSITION[1]
                         )
                     )
-                    pygame.mixer.Sound("Assets/Sounds/wire_place.wav").play()
+                    pygame.mixer.Sound("Assets/Sounds/wire_place.mp3").play()
 
             else:
+                
                 for main, maininstance, neighbor in [(position1, instance1, position2), (position2, instance2, position1)]:
                     if isinstance(maininstance, Wire):
                         wire = maininstance
@@ -323,7 +327,7 @@ class Grid(pygame.sprite.Sprite):
                                 (main[1] * 100) + GRID_POSITION[1]
                             )
                         )
-                pygame.mixer.Sound("Assets/Sounds/wire_place.wav").play()
+                pygame.mixer.Sound("Assets/Sounds/wire_place.mp3").play()
                 
         elif (
             (isinstance(instance1, (Wire, type(None))) and (isinstance(instance2, (IOPort, MicroPointer)))) or
@@ -371,7 +375,7 @@ class Grid(pygame.sprite.Sprite):
             connections.__dict__[direction] = flag
             
             wire.update_connections(connections)
-            pygame.mixer.Sound("Assets/Sounds/wire_place.wav").play()
+            pygame.mixer.Sound("Assets/Sounds/wire_place.mp3").play()
 
 
         
@@ -416,7 +420,7 @@ class Grid(pygame.sprite.Sprite):
                 gotten.set_connected(False)
 
         #play the sfx
-        pygame.mixer.Sound("Assets/Sounds/wire_delete.wav").play()
+        pygame.mixer.Sound("Assets/Sounds/wire_delete.mp3").play()
 
     def do_sim_tick(self):
         """

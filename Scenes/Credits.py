@@ -8,6 +8,7 @@ from Classes.ImageHelper import ImageHelper
 CLOSE_BUTTON_POSITION = (785, 865)
 BACK_BUTTON_POSITION = (410, 865)
 NEXT_BUTTON_POSITION = (1150, 865)
+QUIT_BUTTON_POSITION = (1737, 1021)
 
 class Credits():
     """
@@ -70,7 +71,13 @@ class Credits():
             lambda: change_fn(MainMenu(screen, change_fn)),
             1.05
         )
-        self.sprite_group.add(close_button, main_text)
+        quit_button = ImageButton(
+            pygame.transform.smoothscale_by(pygame.image.load("Assets/Game/quit_button.png").convert_alpha(screen), 0.5),
+            QUIT_BUTTON_POSITION,
+            lambda: exit(),
+            1.05
+        )
+        self.sprite_group.add(close_button, main_text, quit_button)
         
     def update(self):
         """
