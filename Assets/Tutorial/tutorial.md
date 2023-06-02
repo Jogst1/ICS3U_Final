@@ -79,7 +79,7 @@ Microcontrollers have access to basic commands for managing themselves and their
 - <a id="slp"></a>`slp`: Halts execution of the microcontroller for a supplied number of ticks. 
     - Sleep values of `1` will halt the microcontroller for the remainder of the tick, and resume on the next one.
     - The supplied number can either be a numeric literal, or the value within a register. 
-    - Programs should **ALWAYS** have at least one `slp` statement, otherwise they will loop uncontrollably. This is considered undefined behavior, and should be avoided.
+    - ### Programs should **ALWAYS** have at least one `slp` statement, otherwise the microcontroller will not execute at all. This is to avoid infinite looping.
     - Example:
         ```
         slp 3

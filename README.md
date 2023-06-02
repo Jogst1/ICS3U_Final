@@ -22,7 +22,11 @@ Merivale I/O has a number of features, which include:
     ```bash
     pip install pytube
     ```
-    c. `FFmpeg`: downloads [here](https://ffmpeg.org/download.html), used to convert music files into the right format.  
+    c. `glom`: install with [pip](https://pypi.org/project/pip/), used for accessing assets within code.
+    ```bash
+    pip install glom
+    ```
+    d. `FFmpeg`: downloads [here](https://ffmpeg.org/download.html), used to convert music files into the right format.  
     Windows users may be able to run:
     ```bash
     winget install ffmpeg

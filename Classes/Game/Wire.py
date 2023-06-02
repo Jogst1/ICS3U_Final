@@ -1,14 +1,8 @@
 import pygame
+from Classes.Instance import Instance
+from Util.Assets import Assets
 
-surf_for_convert = pygame.display.get_surface()
-IMAGES = {
-    "0": pygame.image.load("Assets/Game/Wires/0.png").convert_alpha(surf_for_convert),
-    "1": pygame.image.load("Assets/Game/Wires/1.png").convert_alpha(surf_for_convert),
-    "2-bent": pygame.image.load("Assets/Game/Wires/2-bent.png").convert_alpha(surf_for_convert),
-    "2-straight": pygame.image.load("Assets/Game/Wires/2-straight.png").convert_alpha(surf_for_convert),
-    "3": pygame.image.load("Assets/Game/Wires/3.png").convert_alpha(surf_for_convert),
-    "4": pygame.image.load("Assets/Game/Wires/4.png").convert_alpha(surf_for_convert),
-}
+#set up font constant for rendering text labels
 FONT = pygame.font.Font("Assets/Fonts/IBMPlexMono-Medium.ttf", 16)
 
 class Neighbors():
@@ -32,31 +26,39 @@ class Neighbors():
             ) 
             if flag
         ]
+    
+class Wire(Instance):
+    def __init__(self, parent: Instance, connections: Neighbors, position: tuple[int, int], zOffset: int = 0):
+        super().__init__(parent)
 
-class Wire(pygame.sprite.Sprite):
-    def __init__(self, connections: Neighbors, position: tuple[int]):
-        super().__init__()
-        
-        self.value = 0
         self.position = position
-        self.connections = connections
+        self.zoffset = zOffset
+
         self.update_connections(connections)
+        self.update_value(0)
 
-        
-    def update_surf(self):
-        self.surf = self.clean_surf.copy()
+    def update_value(self, value: int):
+        self.value = value
         render = FONT.render(str(self.value), True, (0, 0, 0))
-        rect = render.get_rect()
-        rect.center = (50, 50)
-        self.surf.blit(render, rect)
+        rect = render.get_rect(
+            center=(50+self.position[0], 50+self.position[1])
+        )
+        self.renderables["text"] = (
+            (render,
+            rect),
+            1 + self.zoffset
+        )
 
-    def update_connections(self, connections: Neighbors):
+    def update_connections(self, connections:Neighbors):
         self.connections = connections
         num_connections = len([x for x in [connections.up, connections.down, connections.left, connections.right] if x])
+        
+        surf = None
+
         if num_connections == 0:
-            self.clean_surf = IMAGES["0"]
+            surf = Assets.Game.Wires["0"].png
         elif num_connections == 1:
-            self.clean_surf = IMAGES["1"]
+            surf = Assets.Game.Wires["1"].png
             angle = 0
             if connections.up:
                 angle = 90   
@@ -64,35 +66,40 @@ class Wire(pygame.sprite.Sprite):
                 angle = 180
             elif connections.down:
                 angle = 270
-            self.clean_surf = pygame.transform.rotate(self.clean_surf, angle)
+            surf = pygame.transform.rotate(surf, angle)
 
         elif num_connections == 3:
-            self.clean_surf = IMAGES["3"]
+            surf = Assets.Game.Wires["3"].png
 
             if connections.left:
                 if connections.right and connections.up:
-                    self.clean_surf = pygame.transform.rotate(self.clean_surf, 90)           
+                    surf = pygame.transform.rotate(surf, 90)           
                 elif connections.down and connections.up:
-                    self.clean_surf = pygame.transform.rotate(self.clean_surf, 180)
+                    surf = pygame.transform.rotate(surf, 180)
                 elif connections.down and connections.right:
-                    self.clean_surf = pygame.transform.rotate(self.clean_surf, 270)
+                    surf = pygame.transform.rotate(surf, 270)
                     
         elif num_connections == 4:
-            self.clean_surf = IMAGES["4"]
+            surf = Assets.Game.Wires["4"].png
         else: #2
             if (connections.up and connections.down) or (connections.left and connections.right):
-                self.clean_surf = IMAGES["2-straight"]
+                surf = Assets.Game.Wires["2-straight"].png
                 if connections.up:
-                    self.clean_surf = pygame.transform.rotate(self.clean_surf, 90)
+                    surf = pygame.transform.rotate(surf, 90)
             else:
-                self.clean_surf = IMAGES["2-bent"]
+                surf = Assets.Game.Wires["2-bent"].png
                 if connections.left:
-                    self.clean_surf = pygame.transform.rotate(self.clean_surf, 270 if connections.down else 180)
+                    surf = pygame.transform.rotate(surf, 270 if connections.down else 180)
                 elif connections.up:
-                    self.clean_surf = pygame.transform.rotate(self.clean_surf, 90)
-        
-        self.rect = self.clean_surf.get_rect()
-        self.rect.topleft = self.position
-        self.update_surf()
+                    surf = pygame.transform.rotate(surf, 90)
 
-
+        rect = surf.get_rect(
+            topleft = self.position
+        )
+        self.renderables["wire"] = (
+            (
+                surf, 
+                rect
+            ),
+            2 + self.zoffset
+        )

@@ -1,91 +1,142 @@
-import pygame
-import math
+from math import *
 import typing
+import pygame
+from pygame import gfxdraw
+from Classes.Instance import Instance, MouseState
 
-class ImageButton(pygame.sprite.Sprite):
+
+class ImageButton(Instance):
     """
-    A general purpose class for images as buttons. Allows for onclick events, and an expand-on-hover feature.
+    An Image Button class, with an on-click event, and expand-on-hover behavior.
     """
-    def __init__(self, image: pygame.Surface, position: tuple, onclick: typing.Callable, expandOnHover:float=None):
-        """
-        Parameters
-        ----------
-        image:
-            The image to display on the button
-        position:
-            The (x, y) position of where to display the button (uses top-left)
-        onclick:
-            The function to be called when the button is clicked
-        expandOnHover:
-            The factor by which the button will be scaled when hovered. Optional, omit to not scale at all.
-        """
-        super().__init__()
-        self.surf = image
-        #store the original image to switch back to after being scaled, since repeatedly scaling and de-scaling would leave artifacts
-        self.ORIGINAL_SURF = image
-        #position the button
-        self.rect = self.surf.get_rect(
-            topleft = (
-                position[0],
-                position[1]
-            )
+
+    def __init__(
+            self, 
+            parent: Instance, 
+            image: pygame.Surface, 
+            onclick: typing.Callable, 
+            position: tuple[int, int] = (0, 0),
+            expand: float = None, 
+            zIndex: int = 1
+        ):
+        super().__init__(parent)
+
+        self.button_unexpanded = (
+            (
+                image,
+                image.get_rect(
+                    topleft=position
+                )
+            ),
+            zIndex
+        )
+        self.button_expanded = (
+            (
+                pygame.transform.smoothscale_by(image, expand if expand != None else 1),
+                image.get_rect(
+                    topleft=position
+                ).scale_by(expand if expand != None else 1, expand if expand != None else 1)
+            ),
+            zIndex
         )
         self.onclick = onclick
-        self.expandOnHover = expandOnHover
-        #calculate the difference in size when scaled, for both x and y
-        if self.expandOnHover != None:
-            self.expandXDiff = math.ceil(self.rect.size[0] * expandOnHover - self.rect.size[0])
-            self.expandYDiff = math.ceil(self.rect.size[1] * expandOnHover - self.rect.size[1])
-        #variables for keeping track of states/debouncing
-        self.debounce = False
+        self.expand = expand
+
+        self.renderables["button"] = self.button_unexpanded
+
         self.expanded = False
+        self.debounce = False
 
-    def update(self):
-        """
-        Updates the expand-on-hover behaviour and triggers onclick events for the button.
-        """
-        #get the state of the mouse, will be True if mouse1 is pressed, False if not
-        mouse_state = pygame.mouse.get_pressed()[0]
+    def update(self, _: list[pygame.event.Event], mouseState: MouseState, __: float):
 
-        #check if the mouse is hovering on the button
-        if self.rect.collidepoint(pygame.mouse.get_pos()):
-            #check if the mouse is clicking the button, and has not already clicked it very recently
-            #(debounce mainly just prevents the button from being "held down", and makes it impossible to click again without first releasing the mouse)
-            if mouse_state == True and self.debounce == False:
-                #enable debounce
+        #if mouse is hovering over button
+        if self.renderables["button"][0][1].collidepoint(mouseState.x, mouseState.y):
+            if mouseState.lmb and not self.debounce and ("cross" not in self.children):
                 self.debounce = True
-                #play the onclick noise
+                #play sfx
                 pygame.mixer.Sound("Assets/Sounds/button_onclick.mp3").play()
-
-                #trigger the onclick event
+                #run the onclick function
                 self.onclick()
             
-            #check if the button should expand on hover, and is not already expanded
-            if self.expandOnHover != None and self.expanded == False:
-
-                #scale the button by the given expandOnHover factor
-                self.surf = pygame.transform.smoothscale_by(self.surf, self.expandOnHover)
-                #update the rect
-                self.rect.scale_by_ip(self.expandOnHover)
-                #enable the expanded flag
+            #if unexpanded
+            if self.expand != None and not self.expanded:
+                #expand
+                self.renderables["button"] = self.button_expanded
                 self.expanded = True
+
                 #play the hover sfx
                 s=pygame.mixer.Sound("Assets/Sounds/button_hover.mp3")
                 s.set_volume(0.2)
                 s.play()
+
         else:
-            #if the mouse isn't hovering, and the button is expanded,
-            if self.expanded == True:
-                #unexpand the button
-                self.surf = self.ORIGINAL_SURF
-                #update the rect
-                self.rect.scale_by_ip(2 - self.expandOnHover)
-                #disable the expanded flag
+            #if expanded
+            if self.expanded:
+                #unexpand
+                self.renderables["button"] = self.button_unexpanded
                 self.expanded = False
 
-        
-        #disable the debounce flag once the mouse is released
-        if mouse_state == False:
+        if not mouseState.lmb:
             self.debounce = False
 
-        
+#taken from https://stackoverflow.com/questions/68522726/how-to-set-alpha-transparency-property-using-pygame-draw-line
+def aaline(surface, color, start_pos, end_pos, width=1):
+    """ Draws wide transparent anti-aliased lines. """
+    # ref https://stackoverflow.com/a/30599392/355230
+
+    x0, y0 = start_pos
+    x1, y1 = end_pos
+    midpnt_x, midpnt_y = (x0+x1)/2, (y0+y1)/2  # Center of line segment.
+    length = hypot(x1-x0, y1-y0)
+    angle = atan2(y0-y1, x0-x1)  # Slope of line.
+    width2, length2 = width/2, length/2
+    sin_ang, cos_ang = sin(angle), cos(angle)
+
+    width2_sin_ang  = width2*sin_ang
+    width2_cos_ang  = width2*cos_ang
+    length2_sin_ang = length2*sin_ang
+    length2_cos_ang = length2*cos_ang
+
+    # Calculate box ends.
+    ul = (midpnt_x + length2_cos_ang - width2_sin_ang,
+          midpnt_y + width2_cos_ang  + length2_sin_ang)
+    ur = (midpnt_x - length2_cos_ang - width2_sin_ang,
+          midpnt_y + width2_cos_ang  - length2_sin_ang)
+    bl = (midpnt_x + length2_cos_ang + width2_sin_ang,
+          midpnt_y - width2_cos_ang  + length2_sin_ang)
+    br = (midpnt_x - length2_cos_ang + width2_sin_ang,
+          midpnt_y - width2_cos_ang  - length2_sin_ang)
+
+    pygame.gfxdraw.aapolygon(surface, (ul, ur, br, bl), color)
+    pygame.gfxdraw.filled_polygon(surface, (ul, ur, br, bl), color)
+
+
+class Cross(Instance):
+    """
+    Crosses out an imagebutton, indicating it cannot do anything
+    """
+    parent: ImageButton
+    
+    def __init__(self, parent: Instance):
+        super().__init__(parent)
+
+        def lines(screen):
+            rect: pygame.Rect = self.parent.renderables["button"][0][1]
+            aaline(
+                screen,
+                (163, 49, 35),
+                rect.topleft,
+                rect.bottomright,
+                8
+            )
+            aaline(
+                screen,
+                (163, 49, 35),
+                rect.topright,
+                rect.bottomleft,
+                8
+            )
+        self.renderables["lines"] = (
+            lines,
+            0
+        )

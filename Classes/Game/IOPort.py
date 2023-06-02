@@ -1,16 +1,18 @@
 import pygame
-from Classes.Game.Wire import Wire, Neighbors
+import typing
+from Classes.Instance import Instance
+from Classes.Game.Wire import Neighbors, Wire
+from Util.Assets import Assets
 
-IMAGE = pygame.image.load("Assets/Game/ioport.png").convert_alpha(pygame.display.get_surface())
 FONT = pygame.font.Font("Assets/Fonts/IBMPlexMono-Medium.ttf", 10)
 
-class IOPort(pygame.sprite.Sprite):
+class IOPort(Instance):
     """
     Represents an IO port, which can be either input or output
     """
-    def __init__(self, label: str, position: tuple[int, int], values: list[int]=[], ):
 
-        super().__init__()
+    def __init__(self, parent: Instance, label: str, position: tuple[int, int], values: list[int]=[]):
+        super().__init__(parent)
 
         #for input
         self.value_index = 0
@@ -20,56 +22,68 @@ class IOPort(pygame.sprite.Sprite):
         self.output_value = 0
 
         self.label = label
+        self.position = position
 
+        #add sub-wire
+        self.add_child(
+            "subwire",
+            Wire(
+                self,
+                Neighbors(*([False] * 4)),
+                position,
+                2
+            ),
+        )
 
-        #set up a surface and rect for rendering. this surf here will be modified, and is kept as a constant to remain pristine.
-        self.CONSTANT_SURF = IMAGE.copy()
-        self.surf = self.CONSTANT_SURF.copy()
-        self.rect = self.surf.get_rect()
-        self.rect.topleft = position
+        #render the label text
+        textrender = FONT.render(label, True, (0, 0, 0))
+        self.renderables["label"] = (
+            (textrender,
+            textrender.get_rect(
+                midtop = (position[0] + 50, position[1] + 35)
+            )),
+            1
+        )
 
-        self.subwire = Wire(Neighbors(*([False] * 4)), (0, 0))
-
-        #render the label text onto the surface
-        text = FONT.render(label, True, (0, 0, 0))
-        textrect = text.get_rect()
-        textrect.midtop = (50, 35)
-        self.CONSTANT_SURF.blit(text, textrect)
+        #render the icon
+        self.renderables["icon"] = (
+            (Assets.Game.ioport.png,
+            Assets.Game.ioport.png.get_rect(topleft=position)),
+            2
+        )
 
         #to keep track of if the ioport is on its first tick or not
         self.first_tick = True
 
-        #update the surface with initial values
-        self.update_surf()
+        self.update_visuals()
 
-    def is_output_port(self):
+    def is_output_port(self) -> bool:
         """
         Returns whether the port is an output port (if the port label contains 'output')
         """
         return ("output" in self.label.lower())
-
-    def update_surf(self):
+    
+    def update_visuals(self):
         """
-        Updates the IOPort's surface with the value it is currently on
+        Updates the visuals for the ioport
         """
-        self.surf.fill((0, 0, 0, 0))
 
-        #render the sub-wire (First so its beneath everything else)
-        self.surf.blit(self.subwire.surf, self.subwire.rect)
-
-        #reset to the initial surf
-        self.surf.blit(self.CONSTANT_SURF, (0, 0))
-        
-        #render the value text
-        val = self.output_value if self.is_output_port() else self.values[self.value_index]
-        text = FONT.render(str(val), True, (0, 0, 0))
-        textrect = text.get_rect()
-        textrect.midtop = (50, 50)
-        self.surf.blit(text,textrect)
-        
-        
-
-    def do_sim_tick(self):
+        value = self.output_value if self.is_output_port() else self.values[self.value_index]
+        render = FONT.render(str(value), True, (0, 0, 0))
+        self.renderables["value"] = (
+            (
+                render,
+                render.get_rect(
+                    midtop = (
+                        50 + self.position[0],
+                        50 + self.position[1]
+                    )
+                )
+            ),
+            1
+        )
+    
+    def tick(self):
         """
         Performs a simulation tick, updating the input value if it is an input port, and doing nothing if it is an output port or it is the first tick
         """
@@ -83,4 +97,3 @@ class IOPort(pygame.sprite.Sprite):
         else:
             self.value_index += 1
             self.value_index = min(self.value_index, len(self.values)-1)
-    
