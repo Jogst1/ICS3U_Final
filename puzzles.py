@@ -4,7 +4,7 @@ import random
 from Classes.Puzzles.Testcase import Testcase
 from Classes.Puzzles.Puzzle import Puzzle
 
-#set up a consistent random number generator to allow for consistent puzzles
+#set up a consistent random number generator to allow for consistent puzzle testcases
 random.seed(10)
 
 puzzles = []
@@ -86,5 +86,44 @@ puzzle3 = Puzzle(
     puzzle3_testcase(),
     []
 )
-puzzles.append(puzzle3)
 # sol'n https://i.imgur.com/zQNQlmS.png
+
+PUZZLE4_WANTED_LEN = 30
+def puzzle4_testcase():
+    input1 = []
+    input2 = []
+    output1 = []
+    
+    while len(input1) < PUZZLE4_WANTED_LEN:
+        start_block_length = random.randint(0, 2)
+        input1.extend([0] * start_block_length)
+        input2.extend([0] * start_block_length)
+        output1.extend([0] * start_block_length)
+        block_length = random.randint(2, 7)
+        input1.append(block_length)
+        pitch = random.randint(1, 99)
+        input2.append(pitch)
+        input1.extend([0] * block_length)
+        input2.extend([0] * block_length)
+        output1.extend([0] * block_length)
+        output1.append(pitch)
+
+    if len(input1) % 2 != 0:
+        input1.append(0)
+        input2.append(0)
+        output1.append(0)
+
+    return Testcase(
+        input1,output1,input2,[0]*len(input1)
+    )
+
+puzzle4 = Puzzle(
+    "A student has asked you to design a timer for helping them practice their sprinting in gym class. Whenever Input 1 contains a value, set a timer with the length being that value. On the same tick, Input 2 will contain the desired pitch of the timer. Once the timer is up, output the desired pitch to Output 1 for a single tick.",
+
+    puzzle4_testcase(),
+    [puzzle4_testcase() for _ in range(5)]
+)
+puzzles.append(puzzle4)
+
+#this is arguably harder so add it last
+puzzles.append(puzzle3)

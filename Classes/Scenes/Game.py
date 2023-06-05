@@ -207,6 +207,8 @@ class Game(Instance):
                 del self.renderables["win_screen"]
                 self.remove_child("next_button")
                 self.remove_child("keep_button")
+                if "text_overwrite" in self.renderables:
+                    del self.renderables["text_overwrite"]
 
             if "lose_screen" in self.renderables:
                 del self.renderables["lose_screen"]
@@ -233,26 +235,38 @@ class Game(Instance):
                 ),
                 -1
             )
-            def next_onclick():
-                self.parent.add_child(
-                    f"game_scene_{self.puzzleId+1}",
-                    Game(
-                        self.parent,
-                        self.puzzleId+1
+            if self.puzzleId+1 < len(puzzles):
+                def next_onclick():
+                    self.parent.add_child(
+                        f"game_scene_{self.puzzleId+1}",
+                        Game(
+                            self.parent,
+                            self.puzzleId+1
+                        )
+                    )
+                    self.parent.remove_child(f"game_scene_{self.puzzleId}")
+                self.add_child(
+                    "next_button",
+                    ImageButton(
+                        self,
+                        Assets.Game.next_level_button.png,
+                        next_onclick,
+                        (730, 622),
+                        1.05,
+                        -2
                     )
                 )
-                self.parent.remove_child(f"game_scene_{self.puzzleId}")
-            self.add_child(
-                "next_button",
-                ImageButton(
-                    self,
-                    Assets.Game.next_level_button.png,
-                    next_onclick,
-                    (730, 622),
-                    1.05,
-                    -2
+            else:
+                self.renderables["text_overwrite"] = (
+                    (Assets.Game.text_overwrite.png,
+                    Assets.Game.text_overwrite.png.get_rect(
+                        topleft = (
+                            730,
+                            425
+                        )
+                    )),
+                    -1
                 )
-            )
             def keep_onclick():
                 self.status = Status.Playing
                 self.update_win_lose_screen()
@@ -262,7 +276,7 @@ class Game(Instance):
                     self,
                     Assets.Game.keep_playing_button.png,
                     keep_onclick,
-                    (730, 723),
+                    (730, (723 if self.puzzleId+1 < len(puzzles) else 672)),
                     1.05,
                     -2
                 )

@@ -260,7 +260,7 @@ class Microcontroller(Instance):
             self.typing_interval += deltaTime
             already_handled_keys = []
 
-            if self.typing_interval > 0.2:
+            if self.typing_interval > 0.15:
                 if (keys[pygame.K_DELETE] or keys[pygame.K_BACKSPACE]):
                     self.handle_typing(pygame.K_DELETE, "Uni Code? Like a computer science course you'd take in university?")
                     already_handled_keys.append(pygame.K_DELETE)
@@ -439,7 +439,10 @@ class Microcontroller(Instance):
         stored_mhs = self.mhs
         stored_ics = self.ics
 
-        while self.sleep_counter == 0:
+        max_counter = 0
+
+        while self.sleep_counter == 0 and max_counter < 1000:
+            max_counter += 1
             #if current line is an error, skip it
             if self.current_sim_line in self.line_errors:
                 self.current_sim_line = (self.current_sim_line + 1) % 10

@@ -24,7 +24,7 @@ class Root(Instance):
         #add volume slider and quit button (universal across all screens, so adding them both here)
         self.add_child("volume_slider", VolumeSlider(self))
 
-        pygame.mixer_music.set_volume(0)
+        pygame.mixer_music.set_volume(0.5)
 
         def quit(): self.game_running = False
         self.add_child("quit_button", ImageButton(

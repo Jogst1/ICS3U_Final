@@ -54,7 +54,11 @@ This section contains full solutions to each puzzle. Images are initially hidden
 </details>
 <details>
     <summary>Puzzle 3</summary>
-    <img src="https://i.imgur.com/3UKHtF2.png" alt="Solution to Puzzle 3"></img>
+    <img src="https://i.imgur.com/yOivS7B.png" alt="Solution to Puzzle 3"></img>
+</details>
+<details>
+    <summary>Puzzle 4</summary>
+    <img src="https://i.imgur.com/3UKHtF2.png" alt="Solution to Puzzle 4"></img>
 </details>
 
 ## Support
