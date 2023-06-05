@@ -17,6 +17,7 @@ onion = typing.Union[
     tuple[pygame.Surface, int], 
     tuple[typing.Callable[[pygame.Surface], None], int]
 ]
+#i learned about newtype/type aliases from this page: https://docs.python.org/3/library/typing.html#newtype
 Renderable = typing.NewType("Renderable", onion) #ide marks this as error but it runs fine, unsure why
 
 class MouseState():

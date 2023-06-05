@@ -12,6 +12,9 @@ from Classes.Game.IOGraph import IOGraph
 INSTRUCTIONS_POSITION = (1549, 145)
 INSTRUCTIONS_SIZE = (353, 575)
 
+#i learned about enums from here:
+#https://docs.python.org/3/library/enum.html#enum.Enum
+#had the idea to use them and search for the specific term due to my experience with rust
 class Status(Enum):
     """
     Represents the state of a puzzle, can be the win or lose state, or still playing state

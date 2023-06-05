@@ -12,6 +12,11 @@ class VolumeSlider(Instance):
         self.debounce = False
 
         #set up the volume icon, with zindex 1
+            #originally found out how to scale from this stackoverflow post:
+            #https://stackoverflow.com/questions/21082145/pygame-scaling-a-sprite
+            #ended up finding smoothscale from my IDE's autocomplete
+        #the volume icon was downloaded from wikimedia commons: 
+        #https://commons.wikimedia.org/wiki/File:Speaker_Icon.svg
         self.renderables["icon"] = (
             pygame.transform.smoothscale(
                 pygame.image.load("Assets/volume_icon.png")
@@ -41,11 +46,15 @@ class VolumeSlider(Instance):
     def update(self, _: list[pygame.event.Event], mouseState: MouseState, __: float):
         if mouseState.lmb:
             if (
+                #learned how to detect hover from this stackoverflow post
+                #https://stackoverflow.com/questions/17935484/mouseover-in-pygame
                 self.renderables["icon"][0].get_rect().collidepoint(mouseState.x, mouseState.y)
                 and (not self.debounce)
             ):
                 self.open = not self.open
-            
+
+            #learned how to detect hover from this stackoverflow post
+            #https://stackoverflow.com/questions/17935484/mouseover-in-pygame
             if VOLUME_ADJUST_RECT.collidepoint(mouseState.x, mouseState.y) and self.open:
                 pygame.mixer_music.set_volume(max(0, (125-mouseState.y)/100))
             self.debounce = True

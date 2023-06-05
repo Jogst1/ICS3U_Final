@@ -32,6 +32,9 @@ class ImageButton(Instance):
         )
         self.button_expanded = (
             (
+                #originally found out how to scale from this stackoverflow post:
+                #https://stackoverflow.com/questions/21082145/pygame-scaling-a-sprite
+                #ended up finding smoothscale_by from my IDE's autocomplete
                 pygame.transform.smoothscale_by(image, expand if expand != None else 1),
                 image.get_rect(
                     topleft=position
@@ -50,6 +53,8 @@ class ImageButton(Instance):
     def update(self, _: list[pygame.event.Event], mouseState: MouseState, __: float):
 
         #if mouse is hovering over button
+            #learned how to detect hover from this stackoverflow post
+            #https://stackoverflow.com/questions/17935484/mouseover-in-pygame
         if self.renderables["button"][0][1].collidepoint(mouseState.x, mouseState.y):
             if mouseState.lmb and not self.debounce and ("cross" not in self.children):
                 self.debounce = True

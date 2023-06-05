@@ -43,7 +43,11 @@ Merivale I/O has a number of features, which include:
 - WIP
 
 ## Cheat Codes
-This section contains full solutions to each puzzle. Images are initially hidden, click to reveal.
+This section contains full solutions to each puzzle. Images are initially hidden, click to reveal.  
+  
+[//]: # (I learned how to do markdown comments from this stackoverflow post: https://stackoverflow.com/questions/4823468/comments-in-markdown)  
+[//]: # (I learned how to make 'spoilered' images from this stackoverflow post: https://stackoverflow.com/questions/32814161/how-to-make-spoiler-text-in-github-wiki-pages)  
+  
 <details>
     <summary>Puzzle 1</summary>
     <img src="https://i.imgur.com/kTpNVyp.png" alt="Solution to Puzzle 1"></img>
@@ -66,5 +70,6 @@ For any questions, support, or contact, please email me at `jogst1@ocdsb.ca`
 You can also create an issue on the [GitHub repository](https://github.com/Jogst1/ICS3U_Final)
 
 ## Sources
-See the [reference tracker](https://docs.google.com/document/d/1-7uoMtHautyOPwjpPivfaJ6HS_USsd2cKbdPfraUUYE/edit?usp=sharing) (WIP)  
-Additionally, check out the in-game credits screen.
+See the [reference tracker](https://docs.google.com/document/d/1-7uoMtHautyOPwjpPivfaJ6HS_USsd2cKbdPfraUUYE/edit?usp=sharing)  
+Additionally, check out the in-game credits screen.  
+There are also sources included throughout the project code.  

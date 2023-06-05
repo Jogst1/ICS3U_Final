@@ -1,3 +1,6 @@
+#throughout this file I use the __dict__ property, which i learned about from here:
+#https://docs.python.org/3/reference/datamodel.html
+
 import pygame
 import typing
 from collections import deque
@@ -479,6 +482,8 @@ class Grid(Instance):
             micro.tick()
         
         #get a list of all the output ports for every microcontroller
+            #i took the code for how to "flatten" a list of sublists from:
+            # https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists 
         visited = [
             item for sublist in 
             [

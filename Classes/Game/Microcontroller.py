@@ -1,3 +1,6 @@
+#throughout this file I use the __dict__ property, which i learned about from here:
+#https://docs.python.org/3/reference/datamodel.html
+
 import pygame
 from enum import Enum
 import typing
@@ -56,6 +59,9 @@ CONDITIONALS = [
 ]
 
 #set up an enum for which renderable to update
+    #i learned about enums from here:
+    #https://docs.python.org/3/library/enum.html#enum.Enum
+    #had the idea to use them and search for the specific term due to my experience with rust
 class UpdateId(Enum):
     Text = 1
     Errors = 2
@@ -244,6 +250,8 @@ class Microcontroller(Instance):
 
         if mouseState.lmb:
             #if hovering on text input area
+                #learned how to detect hover from this stackoverflow post
+                #https://stackoverflow.com/questions/17935484/mouseover-in-pygame
             if self.text_rect.collidepoint(mouseState.x, mouseState.y):
                 #set the current line based on the user's mouse y position 
                 self.current_line = (mouseState.y - self.text_rect.topleft[1]) // 16
