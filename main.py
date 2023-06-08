@@ -6,12 +6,19 @@ A computer-science game based on Shenzhen I/O.
 History:
 3/29/2023: Program Creation
 6/5/2023: Major Rewrite
+6/8/2023: Fix silly mistake, I forgot to include the music downloading code in the rewrite
 """
 
 #import os for disabling pygame welcome message
 #https://stackoverflow.com/questions/51464455/how-to-disable-welcome-message-when-importing-pygame
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
+
+#download the music if not downloaded already
+# ---- NOTE: This was not here on the original final submission for the project, I forgot to add it. However, it's just 3 lines of code, and it was such a silly mistake I figured I should really just add it ---- #
+from Assets.Music.get_music import download, is_downloaded
+if not is_downloaded():
+    download()
 
 #import pygame 
 import pygame
